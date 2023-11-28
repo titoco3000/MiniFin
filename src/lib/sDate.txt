@@ -1,0 +1,71 @@
+const weekdays = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function fmtInt(integer:number, size:number){
+    let s = `${integer}`;
+    while(s.length<size){
+        s = '0'+s;
+    }
+    return s;
+}
+
+function rmvPreZrs(s:string){
+    s = ''+s
+    while(s.length>1 && s[0]=='0')
+        s = s.substring(1)
+    return s;
+}
+
+//acts like a string is the object.
+//sDate objects should AWAYS in local time.
+export class sDate {
+    s:string;
+    format = {
+        dayMonthYear: 0,
+        yearMonthDay: 1,
+        monthDayYear: 2,
+        dayMonth: 3,
+        monthDay: 4,
+        localDashed: 5
+    };
+
+    constructor() {
+        let date = new Date();
+        this.s = `${fmtInt(date.getFullYear(),4)}-${fmtInt(date.getMonth() + 1,2)}-${fmtInt(date.getDate(),2)}`;
+         = "hello";
+    }
+
+    today: () => {
+        let date = new Date();
+        return `${fmtInt(date.getFullYear(),4)}-${fmtInt(date.getMonth() + 1,2)}-${fmtInt(date.getDate(),2)}`;
+    },
+    offset: (date, amount) => {
+        let newDate = new Date(date+'T00:00:00.000Z');
+        newDate.setDate(newDate.getUTCDate() + amount-1);
+        return `${fmtInt(newDate.getUTCFullYear(),4)}-${fmtInt(newDate.getUTCMonth() + 1,2)}-${fmtInt(newDate.getUTCDate(),2)}`;
+    },
+    formated: (date, formatType) => {
+        date = new Date(date+'T00:00:00.000Z');
+        const sep = '/';
+        if (formatType == 0)
+            return rmvPreZrs(date.getUTCDate()) + sep + rmvPreZrs(date.getUTCMonth()+1) + sep + rmvPreZrs(date.getUTCFullYear());
+        if (formatType == 1)
+            return rmvPreZrs(date.getUTCFullYear()) + sep + rmvPreZrs(date.getUTCMonth()+1) + sep + rmvPreZrs(date.getUTCDate());
+        if (formatType == 2)
+            return rmvPreZrs(date.getUTCMonth()+1) + sep + rmvPreZrs(date.getUTCDate()) + sep + rmvPreZrs(date.getUTCFullYear());
+        if (formatType == 3)
+            return rmvPreZrs(date.getUTCDate()) + sep + rmvPreZrs(date.getUTCMonth()+1);
+            if (formatType == 4)
+            return rmvPreZrs(date.getUTCMonth()+1) + sep + rmvPreZrs(date.getUTCDate());
+        if (formatType == 5){
+            return `${date.getUTCFullYear()}-${fmtInt(date.getUTCMonth()+1,2)}-${fmtInt(date.getUTCDate(),2)}`;    
+        }
+
+    },
+    equal: (A, B) => {
+        return A == B;
+    },
+    weekday: (A) => {
+        let d = new Date(A+'T00:00:00.000Z');
+        return weekdays[ d.getUTCDay()];
+    }
+}

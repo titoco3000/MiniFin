@@ -1,0 +1,5 @@
+[
+	{"nome": "Maria", "modificado": "2023-09-13", "setor": "manutenção", "empresa":"Hotel", "pagamento":"Cartão","caixa":"Bradesco" },
+	{"nome": "João", "modificado": "2023-09-13", "setor": "manutenção", "empresa":"Restaurante", "pagamento":"Cartão","caixa":"Bradesco" }
+]
+

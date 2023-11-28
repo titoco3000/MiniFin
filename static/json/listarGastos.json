@@ -1,0 +1,26 @@
+[
+	{
+		"valor": 123,
+		"nf": 4638,
+		"data": "2022-09-13",
+		"modificado": "2023-09-13",
+		"setor": "manutenção",
+		"empresa": "Hotel",
+		"pagamento": "Cartão",
+		"caixa": "Bradesco",
+		"fornecedor":"Maria",
+		"obs":"Muito a falar"
+	},
+	{
+		"valor": 22,
+		"nf": 223406,
+		"data": "2022-09-13",
+		"modificado": "2023-09-13",
+		"setor": "manutenção",
+		"empresa": "Restaurante",
+		"pagamento": "Dinheiro",
+		"caixa": "Santander",
+		"fornecedor":"João",
+		"obs":""
+	}
+]
