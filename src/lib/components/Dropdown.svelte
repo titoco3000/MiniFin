@@ -52,6 +52,8 @@
 		return v.join(' ');
 	}
 
+	export let onEdit = (v:string[])=>{};
+
 
 	let mainEl:HTMLElement;
 	let ulEl:HTMLElement;
@@ -62,10 +64,7 @@
 		
 		setTimeout(()=>{
 			ulEl.style.display = "block";
-			
-			// mainEl.focus();
-			// mainEl.blur();
-
+			onEdit(value);
 		}, 10);
 	}
 	onMount(async () => {

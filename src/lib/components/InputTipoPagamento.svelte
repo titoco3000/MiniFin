@@ -9,6 +9,8 @@
 	export function reset() {
 		dpdEl.reset();
 	}
+	export let valor:string[]=[''];
+	export let onEdit = (v:string[])=>{};
 
 	let dpdEl: any;
 	onMount(async () => {
@@ -19,7 +21,7 @@
 	});
 </script>
 
-<Dropdown bind:this={dpdEl} dados={[['a','b']]}/>
+<Dropdown onEdit={onEdit} bind:this={dpdEl} bind:value={valor} dados={[['a','b']]}/>
 
 <style>
 </style>

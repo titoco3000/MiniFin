@@ -9,6 +9,8 @@
 	export function reset() {
 		dpdEl.reset();
 	}
+	export let valor: string[];
+	export let onEdit = (v:string[])=>{};
 
 	let dpdEl: any;
 	let dados: any = [['A',['1','2']],['B',['1','2']]];
@@ -34,7 +36,7 @@
 	});
 </script>
 
-<Dropdown bind:this={dpdEl} dados={[['A',['1','2']]]} visualTreatment={v=>{
+<Dropdown onEdit={onEdit} bind:this={dpdEl} bind:value={valor} dados={[['A',['1','2']]]} visualTreatment={v=>{
 	return v.join(': ');
 }}/>
 

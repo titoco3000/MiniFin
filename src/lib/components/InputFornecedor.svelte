@@ -10,7 +10,8 @@
 	}
 	export let permitirNovo = true;
 
-	let valor: string = "";
+	export let valor: string = "";
+	export let onEdit = (v:string)=>{};
 
 	let fornecedores: any = [];
 	let visualFornecedores: any = [];
@@ -114,6 +115,7 @@
 			on:focusout={()=>{
 				if(!permitirNovo)
 				valor = fornecedores[0].nome;
+				onEdit(valor);
 			}}
 		/>
 		<button class="show-suggestions" on:click={exibirTodosFornecedores}></button>
