@@ -26,7 +26,7 @@
 :global(.dropdown-main button) {
 	background-color: white;
 	overflow: hidden;
-	border: 0px solid black;
+	border: 1px solid black;
     display: block;
     cursor:auto;
 }
@@ -50,13 +50,14 @@
 :global(.dropdown-main:focus-within > ul > li > button) {
 	min-width: 100px;
     border-width: 1px;
+	border-top-width: 0;
 }
 
 /* Todos os textos em listas */
 :global(.dropdown-main > ul button) {
 	max-height: 0;
     border-width: 0;
-
+	text-align: left;
     transition: max-height var(--tempo-rolamento), border-width var(--tempo-rolamento);
 }
 :global(.dropdown-main:focus-within > ul button) {
