@@ -8,6 +8,7 @@
 	export function reset(){
 		valor = '';
 	}
+	export let permitirNovo = true;
 
 	let valor: string = "";
 
@@ -83,7 +84,12 @@
 	}
 
 	onMount(async () => {
-		listarFornecedores().then((f) => (fornecedores = f));
+		listarFornecedores().then((f) => {
+			fornecedores = f;
+			if(valor==""){
+				valor = fornecedores[0].nome;
+			}
+		});
 	});
 </script>
 
@@ -103,7 +109,11 @@
 			bind:value={valor}
             bind:this={inputEl}
 			on:input={() => {
-				visualFornecedores = assignDistancesAndSort(valor);//.slice(0, 5)
+				visualFornecedores = assignDistancesAndSort(valor);
+			}}
+			on:focusout={()=>{
+				if(!permitirNovo)
+				valor = fornecedores[0].nome;
 			}}
 		/>
 		<button class="show-suggestions" on:click={exibirTodosFornecedores}></button>
@@ -114,7 +124,6 @@
                 valor = fornecedor.nome;
 				inputEl.focus();
 				inputEl.blur();
-                //visualFornecedores = [];
                 }}>{fornecedor.nome}</button></li>
 		{/each}
 	</ul>
@@ -151,6 +160,7 @@
 		width: 100%;
 		box-sizing: border-box;
 		top: 2.5px;
+		z-index: 10;
 	}
 	li {
 		border: solid black;
