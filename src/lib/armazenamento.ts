@@ -19,7 +19,7 @@ interface Fornecedor {
 	pagamento: string;
 	caixa: string;
 }
-interface Gasto {
+export interface Gasto {
 	valor: number;
 	nf: number;
 	data: string;
@@ -162,8 +162,22 @@ export async function listarFornecedores(): Promise<Fornecedor[]> {
 		}
 	];
 }
-export async function listarGastos(): Promise<Gasto[]> {
-	return [
+export class FiltroGastos {
+	dataInicial = { v: '', h: false };
+	dataFinal = { v: '', h: false };
+	fornecedor = { v: '', h: false };
+	empresa = { v: [''], h: false };
+	setor = { v: [''], h: false };
+	pagamento = { v: [''], h: false };
+	caixa = { v: [''], h: false };
+
+	equals(outro: FiltroGastos) {
+		return JSON.stringify(this) == JSON.stringify(outro);
+	}
+}
+
+export async function listarGastos(filtro:FiltroGastos): Promise<Gasto[]> {
+	let todos = [
 		{
 			valor: 123,
 			nf: 4638,
@@ -189,6 +203,17 @@ export async function listarGastos(): Promise<Gasto[]> {
 			obs: ''
 		}
 	];
+	const repeat = (arr:any[], n:number) => [].concat(...Array(n).fill(arr));
+
+	for (const key in filtro) {
+		let value = (filtro as any)[key];
+		if(value.h){
+			todos = todos.filter((e)=>{
+				return (e as any)[key] == value.v;
+			});
+		}
+	}
+	return repeat(todos, 50);
 }
 export async function listarPagamentos(): Promise<TipoDePagamento[]> {
 	return [
