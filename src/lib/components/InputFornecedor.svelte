@@ -6,7 +6,11 @@
 		return valor;
 	}
 	export function reset(){
-		valor = '';
+		if(permitirNovo)
+			valor = '';
+		else{
+			valor = fornecedores[0].nome;
+		}
 	}
 	export let permitirNovo = true;
 
@@ -81,14 +85,19 @@
 	}
 
 	function exibirTodosFornecedores() {
+		console.log('exb');
+		
 		visualFornecedores = fornecedores;
 	}
+
+	function ehMesmoFornecedor(fornecedor:{nome:string}){return fornecedor.nome == valor}
+
 
 	onMount(async () => {
 		listarFornecedores().then((f) => {
 			fornecedores = f;
 			if(valor==""){
-				valor = fornecedores[0].nome;
+				reset();
 			}
 		});
 	});
@@ -100,8 +109,16 @@
 			let isRelated =
 				event.relatedTarget instanceof Element ? mainEl.contains(event.relatedTarget) : false;
 			// if is loosing focus to a non-related element
-			if(!isRelated){
-                // visualFornecedores = [];
+			
+			if(isRelated){
+				let buttonContent = event.relatedTarget instanceof HTMLButtonElement ? event.relatedTarget.innerText:'';
+				console.log(`buttonContent "${buttonContent}"`);
+				if(buttonContent!=''){
+					valor = buttonContent;
+					inputEl.focus();
+					inputEl.blur();
+
+				}
             }
         }}
 	>
@@ -113,9 +130,11 @@
 				visualFornecedores = assignDistancesAndSort(valor);
 			}}
 			on:focusout={()=>{
-				if(!permitirNovo)
-				valor = fornecedores[0].nome;
-				onEdit(valor);
+				// if(!permitirNovo && !fornecedores.find(ehMesmoFornecedor))
+				// 	console.log(fornecedores);
+				
+				// 	valor = fornecedores[0].nome;
+				// onEdit(valor);
 			}}
 		/>
 		<button class="show-suggestions" on:click={exibirTodosFornecedores}></button>
@@ -123,9 +142,8 @@
 	<ul>
 		{#each visualFornecedores as fornecedor, i}
 			<li><button on:click={ ()=>{
-                valor = fornecedor.nome;
-				inputEl.focus();
-				inputEl.blur();
+				
+				
                 }}>{fornecedor.nome}</button></li>
 		{/each}
 	</ul>
