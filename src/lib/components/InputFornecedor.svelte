@@ -108,18 +108,19 @@
 		on:focusout={(event) => {
 			let isRelated =
 				event.relatedTarget instanceof Element ? mainEl.contains(event.relatedTarget) : false;
-			// if is loosing focus to a non-related element
 			
 			if(isRelated){
 				let buttonContent = event.relatedTarget instanceof HTMLButtonElement ? event.relatedTarget.innerText:'';
-				console.log(`buttonContent "${buttonContent}"`);
 				if(buttonContent!=''){
 					valor = buttonContent;
 					inputEl.focus();
 					inputEl.blur();
-
+					onEdit(valor);
 				}
             }
+			else{
+				onEdit(valor);
+			}
         }}
 	>
 		<input
