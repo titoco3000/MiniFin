@@ -176,7 +176,7 @@ export class FiltroGastos {
 	}
 }
 
-export async function listarGastos(filtro:FiltroGastos): Promise<Gasto[]> {
+export async function listarGastos(filtro:FiltroGastos, sortParameter:{v:string, d:boolean}): Promise<Gasto[]> {
 	let todos = [
 		{
 			valor: 123,
@@ -193,7 +193,7 @@ export async function listarGastos(filtro:FiltroGastos): Promise<Gasto[]> {
 		{
 			valor: 22,
 			nf: 223406,
-			data: '2022-09-13',
+			data: '2021-09-13',
 			modificado: '2023-09-13',
 			setor: 'manutenção',
 			empresa: 'Restaurante',
@@ -213,7 +213,21 @@ export async function listarGastos(filtro:FiltroGastos): Promise<Gasto[]> {
 			});
 		}
 	}
-	return repeat(todos, 50);
+	let gastos = repeat(todos, 50);
+
+	//ordena de acordo com o sortParameter
+	let parametro = sortParameter.v.toLowerCase();
+	let sorter = (a: any, b: any) =>
+		a[parametro].localeCompare(b[parametro], 'pt', { sensitivity: 'base' });
+	if (parametro == 'data')
+		sorter = (a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime();
+	else if (parametro == 'nf' || parametro == 'valor') sorter = (a: any, b: any) => parseInt(a[parametro]) - parseInt(b[parametro]);
+	else if (parametro.startsWith('obs')) {
+		sorter = (a: any, b: any) => a.obs.localeCompare(b.obs, 'pt', { sensitivity: 'base' });
+	}
+	gastos.sort(sorter);
+	if (sortParameter.d) gastos.reverse();
+	return gastos;
 }
 export async function listarPagamentos(): Promise<TipoDePagamento[]> {
 	return [

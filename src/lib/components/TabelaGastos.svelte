@@ -7,12 +7,25 @@
 	import { listarGastos, type Gasto, FiltroGastos as Filtro } from '$lib/armazenamento';
 	import { onMount } from 'svelte';
 
+	const titulos = [
+		'Data',
+		'Fornecedor',
+		'Empresa',
+		'Setor',
+		'Valor',
+		'Pagamento',
+		'NF',
+		'Caixa',
+		'Observações'
+	];
+
 	let filtroAplicado = new Filtro();
 	let filtroAtual = new Filtro();
 
 	let filtroEl: HTMLElement;
 	let setorToggleEl: HTMLInputElement;
 	let empresaToggleEl: HTMLInputElement;
+	let tableHeaderEl: HTMLElement;
 
 	let dataInicialEl: HTMLInputElement;
 	let dataFinalEl: HTMLInputElement;
@@ -23,6 +36,9 @@
 	let caixaEl: { reset: Function };
 
 	let gastosFiltrados: Gasto[] = [];
+
+	// direção: 0 para menor ao maior
+	let sortParameter = { v: titulos[0], d: false };
 
 	function selecionarFiltro(e: any) {
 		algoModificado();
@@ -63,10 +79,14 @@
 			});
 		}, 1);
 	}
-	function carregarGastos() {
+
+	function carregarGastosComNovoFiltro(){
 		//copia filtro
 		filtroAplicado = Object.assign(new Filtro(), JSON.parse(JSON.stringify(filtroAtual)));
-		listarGastos(filtroAplicado).then((gastos) => {
+		carregarGastos();
+	}
+	function carregarGastos() {
+		listarGastos(filtroAplicado, sortParameter).then((gastos) => {
 			gastosFiltrados = gastos;
 		});
 	}
@@ -82,8 +102,25 @@
 		}
 		algoModificado();
 	}
+	function headerButtonClick(titulo: string) {
+		if (sortParameter.v == titulo) sortParameter.d = !sortParameter.d;
+		else sortParameter.v = titulo;
+		carregarGastos();		
+		titulos.forEach((value, i) => {
+			let el = (tableHeaderEl.childNodes[i] as Element).querySelector('span');
+			if (el) {
+				if (value == sortParameter.v) {
+					el.style.display = 'block';
+					if(sortParameter.d)
+						el.style.rotate = '0deg';
+					else
+						el.style.rotate = '180deg';
+				} else el.style.display = 'none';
+			}
+		});
+	}
 	onMount(() => {
-		carregarGastos();
+		carregarGastosComNovoFiltro();
 	});
 </script>
 
@@ -226,20 +263,23 @@
 	</div>
 	<div class="table-holder">
 		<table>
-			<tr>
-				<th>Data</th>
-				<th>Fornecedor</th>
-				<th>Empresa</th>
-				<th>Setor</th>
-				<th>Valor</th>
-				<th>Pagamento</th>
-				<th>NF</th>
-				<th>Caixa</th>
-				<th>Observações</th>
+			<tr bind:this={tableHeaderEl}>
+				{#each titulos as titulo}
+					<th>
+						<button
+							class="sort-button"
+							on:click={() => {
+								headerButtonClick(titulo);
+							}}
+						>
+							{titulo}<span class="arrow">^</span>
+						</button>
+					</th>
+				{/each}
 			</tr>
 			{#each gastosFiltrados as gasto}
 				<tr>
-					<td>{gasto.data}</td>
+					<td>{new Date(gasto.data).toLocaleDateString('pt-br')}</td>
 					<td>{gasto.fornecedor}</td>
 					<td>{gasto.empresa}</td>
 					<td>{gasto.setor}</td>
@@ -306,6 +346,26 @@
 		flex-grow: 1;
 		overflow: auto;
 	}
+	.sort-button {
+		height: 100%;
+		font: inherit;
+		padding: 0.25rem;
+		width: 100%;
+		border: 0;
+		background-color: transparent;
+		display: flex;
+		justify-content: space-between;
+	}
+	.sort-button span{
+		display: none;
+	}
+	th:first-child .sort-button span{
+		display: block;
+		rotate: 180deg;
+	}
+	th {
+		padding: 0;
+	}
 
 	table {
 		table-layout: fixed;
@@ -314,14 +374,12 @@
 		position: relative;
 		border-collapse: separate;
 		border-spacing: 0;
-
 	}
 	th,
 	td {
 		background-color: white;
 		white-space: nowrap;
 		overflow: hidden;
-		padding: 0.25rem;
 	}
 	th {
 		position: sticky;
@@ -330,16 +388,17 @@
 		border-bottom: 2px solid;
 		border-right: 2px solid;
 	}
-	td{
+	td {
 		border-bottom: 1px solid;
-  		border-right: 1px solid;
+		border-right: 1px solid;
+		padding: 0.25rem;
 	}
 	table th:first-child,
 	table td:first-child {
-	/* Apply a left border on the first <td> or <th> in a row */
-	border-left: 2px solid;
+		/* Apply a left border on the first <td> or <th> in a row */
+		border-left: 2px solid;
 	}
-	
+
 	th:nth-child(2) {
 		width: 13%;
 	}
