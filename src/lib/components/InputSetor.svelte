@@ -9,7 +9,7 @@
 	export function reset() {
 		dpdEl.reset();
 	}
-	export let valor: string[];
+	export let valor: string[] = ['A'];
 	export let onEdit = (v:string[])=>{};
 
 	let dpdEl: any;

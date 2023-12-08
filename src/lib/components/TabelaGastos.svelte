@@ -322,7 +322,6 @@
 		display: flex;
 		width: 100%;
 		height: 100%;
-		border: 1px dashed black;
 	}
 	.filtro {
 		width: 150px;
