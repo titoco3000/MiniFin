@@ -8,8 +8,7 @@ Componentes a serem feitos:
 - input valor - ok
 - dropdowns - ok
 - ocultar dropdown no clique - ok, sketchy
-- Tabela completa
-- Data range 
+- Tabela completa - ok
 - Tabela gasto total por fornecedor
 - Tabela gasto por area
 - Tabela compras por fornecedor

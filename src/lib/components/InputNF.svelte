@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-
+	import { obterDigitosNF } from '$lib/utils';
 	export function obterValor() {
 		return parseInt(inputEl.value.replace(/[^0-9\-]/g, ''));
 	}
@@ -10,7 +10,7 @@
 		inputEl.value = v;
 	}
 
-	export let digitos = 9;
+	let digitos = 9;
 
 	let inputEl: HTMLInputElement;
 
@@ -51,6 +51,7 @@
 	}
 
 	onMount(async () => {
+		digitos = obterDigitosNF();
 		reset();
 	});
 </script>

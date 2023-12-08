@@ -6,6 +6,7 @@
 	import InputTipoPagamento from './InputTipoPagamento.svelte';
 	import { listarGastos, type Gasto, FiltroGastos as Filtro } from '$lib/armazenamento';
 	import { onMount } from 'svelte';
+	import { obterDigitosNF } from '$lib/utils';
 
 	const titulos = [
 		'Data',
@@ -39,6 +40,9 @@
 
 	// direção: 0 para menor ao maior
 	let sortParameter = { v: titulos[0], d: false };
+
+	let somatorioValor = 0;
+	let digitosNF = 9;
 
 	function selecionarFiltro(e: any) {
 		algoModificado();
@@ -80,7 +84,7 @@
 		}, 1);
 	}
 
-	function carregarGastosComNovoFiltro(){
+	function carregarGastosComNovoFiltro() {
 		//copia filtro
 		filtroAplicado = Object.assign(new Filtro(), JSON.parse(JSON.stringify(filtroAtual)));
 		carregarGastos();
@@ -88,6 +92,9 @@
 	function carregarGastos() {
 		listarGastos(filtroAplicado, sortParameter).then((gastos) => {
 			gastosFiltrados = gastos;
+			somatorioValor = gastosFiltrados.reduce((a, b) => {
+				return a + b.valor;
+			}, 0);
 		});
 	}
 	function setorModificado(v: string[]) {
@@ -105,21 +112,30 @@
 	function headerButtonClick(titulo: string) {
 		if (sortParameter.v == titulo) sortParameter.d = !sortParameter.d;
 		else sortParameter.v = titulo;
-		carregarGastos();		
+		carregarGastos();
 		titulos.forEach((value, i) => {
 			let el = (tableHeaderEl.childNodes[i] as Element).querySelector('span');
 			if (el) {
 				if (value == sortParameter.v) {
 					el.style.display = 'block';
-					if(sortParameter.d)
-						el.style.rotate = '0deg';
-					else
-						el.style.rotate = '180deg';
+					if (sortParameter.d) el.style.rotate = '0deg';
+					else el.style.rotate = '180deg';
 				} else el.style.display = 'none';
 			}
 		});
 	}
+	function formatarValor(v:number){
+		let s:string = `${v}`;
+		while(s.length<3) s = '0'+s;
+		return s.slice(0, s.length-2) + "," + s.slice(s.length-2);
+	}
+	function formatarNF(nf:number){
+		let s:string = `${nf}`;
+		while(s.length<digitosNF) s = '0'+s;
+		return s;
+	}
 	onMount(() => {
+		digitosNF = obterDigitosNF();
 		carregarGastosComNovoFiltro();
 	});
 </script>
@@ -259,7 +275,7 @@
 			</div>
 		</div>
 		<button on:click={reset}>Remover Filtros</button>
-		<button on:click={carregarGastos}>Buscar</button>
+		<button on:click={carregarGastosComNovoFiltro}>Buscar</button>
 	</div>
 	<div class="table-holder">
 		<table>
@@ -283,13 +299,20 @@
 					<td>{gasto.fornecedor}</td>
 					<td>{gasto.empresa}</td>
 					<td>{gasto.setor}</td>
-					<td>{gasto.valor}</td>
+					<td>{formatarValor(gasto.valor)}</td>
 					<td>{gasto.pagamento}</td>
-					<td>{gasto.nf}</td>
+					<td>{ formatarNF(gasto.nf)}</td>
 					<td>{gasto.caixa}</td>
 					<td>{gasto.obs}</td>
 				</tr>
 			{/each}
+			<tfoot>
+				<tr>
+					<td colspan="4">Soma</td>
+					<td>{formatarValor(somatorioValor)}</td>
+					<td colspan="4"></td>
+				</tr>
+			</tfoot>
 		</table>
 	</div>
 </main>
@@ -356,10 +379,10 @@
 		display: flex;
 		justify-content: space-between;
 	}
-	.sort-button span{
+	.sort-button span {
 		display: none;
 	}
-	th:first-child .sort-button span{
+	th:first-child .sort-button span {
 		display: block;
 		rotate: 180deg;
 	}
@@ -384,6 +407,13 @@
 	th {
 		position: sticky;
 		top: 0; /* Don't forget this, required for the stickiness */
+		border-top: 2px solid;
+		border-bottom: 2px solid;
+		border-right: 2px solid;
+	}
+	tfoot td {
+		position: sticky;
+		bottom: 0; /* Don't forget this, required for the stickiness */
 		border-top: 2px solid;
 		border-bottom: 2px solid;
 		border-right: 2px solid;
