@@ -32,6 +32,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"levenshtein-array": "^2.2.10"
+		"levenshtein-array": "^2.2.10",
+		"pnpm": "^8.11.0"
 	}
 }
