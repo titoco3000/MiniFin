@@ -92,7 +92,7 @@
 	<section bind:this={ferramentasSecEl}></section>
 </main>
 
-<style>
+<style> 
 	main {
 		display: flex;
 		flex-direction: column;
