@@ -85,8 +85,6 @@
 	}
 
 	function exibirTodosFornecedores() {
-		console.log('exb');
-		
 		visualFornecedores = fornecedores;
 	}
 
@@ -113,8 +111,14 @@
 				let buttonContent = event.relatedTarget instanceof HTMLButtonElement ? event.relatedTarget.innerText:'';
 				if(buttonContent!=''){
 					valor = buttonContent;
+					
+					//precisa esperar um pouco antes de dar o blur para fazer efeito.
+					// timeout = 0 espera o fim do call stack
 					inputEl.focus();
-					inputEl.blur();
+					setTimeout(() => {
+						inputEl.blur();
+					}, 0);
+					
 					onEdit(valor);
 				}
             }
@@ -138,14 +142,11 @@
 				// onEdit(valor);
 			}}
 		/>
-		<button class="show-suggestions" on:click={exibirTodosFornecedores}></button>
+		<button type="button" class="show-suggestions" on:click={exibirTodosFornecedores}></button>
 	</label>
 	<ul>
 		{#each visualFornecedores as fornecedor, i}
-			<li><button on:click={ ()=>{
-				
-				
-                }}>{fornecedor.nome}</button></li>
+			<li><button type="button" on:click={ ()=>{}}>{fornecedor.nome}</button></li>
 		{/each}
 	</ul>
 </main>

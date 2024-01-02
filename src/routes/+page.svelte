@@ -20,6 +20,11 @@
 
 		sec.style.display = 'block';
 	}
+	function formSubmit(e: { preventDefault: () => void; }){
+		e.preventDefault();
+		console.log('submit');
+		
+	}
 	onMount(() => {
 		revelarSection(formSecEl);
 	});
@@ -45,7 +50,7 @@
 		>
 	</nav>
 	<section bind:this={formSecEl}>
-		<form action="">
+		<form on:submit={formSubmit}>
             <!-- svelte-ignore a11y-label-has-associated-control -->
             <label>
                 Fornecedor
