@@ -7,6 +7,8 @@
 	import TabelaGastos from '$lib/components/TabelaGastos.svelte';
 	import { onMount } from 'svelte';
 	import InputTipoPagamento from '$lib/components/InputTipoPagamento.svelte';
+	import InputEmpresa from '$lib/components/InputEmpresa.svelte';
+	import NewDropdown from '$lib/components/NewDropdown.svelte';
 
 	let formSecEl: HTMLElement;
 	let vizSecEl: HTMLElement;
@@ -24,6 +26,7 @@
 </script>
 
 <main>
+	<InputEmpresa/>
 	<nav>
 		<button
 			on:click={() => {
@@ -89,7 +92,9 @@
 	<section bind:this={vizSecEl}>
 		<TabelaGastos />
 	</section>
-	<section bind:this={ferramentasSecEl}></section>
+	<section bind:this={ferramentasSecEl}>
+	<NewDropdown/>
+	</section>
 </main>
 
 <style> 
