@@ -4,8 +4,9 @@
     
     let listEl:HTMLElement;
     let buttonEl:HTMLElement;
-    let value: string[] = [''];
-    export const dados: any = [
+    export let value: string[] = [''];
+
+    export let dados: any = [
 		[
             'main',
             [
@@ -34,9 +35,15 @@
                 d = d[0];
         }
     }
+    export function setDados(v:any){
+        value = v;
+    }
     export let visualTreatment = (v:string[])=>{
 		return v.join(' ');
 	}
+    export let onEdit = (v:string[])=>{
+
+    };
     
     function onBubbleUp(v: string[]) {
 		value = v;
@@ -44,6 +51,7 @@
             buttonEl.focus()
             buttonEl.blur();
         }, 0);
+        onEdit(v);
 	}
 
     onMount(()=>{

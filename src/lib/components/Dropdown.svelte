@@ -73,7 +73,7 @@
 </script>
 
 <main bind:this={mainEl} class="dropdown-main">
-	<button>{visualTreatment(value)}</button>
+	<button type="button">{visualTreatment(value)}</button>
 	<ul bind:this={ulEl} class={directionDown ? 'drop-down' : 'drop-sideways}'}>
 		{#each dados as dado}
 			<DropdownItem bubbleUp={onBubbleUp} dados={dado} />

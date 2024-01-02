@@ -27,14 +27,14 @@
 
 <li>
 	{#if isString(dados)}
-	<button
+	<button type="button"
 		bind:this={btnEl}
 		on:click={() => {
 			bubbleUp([dados]);
 		}}><p>{dados}</p></button
 	>
 	{:else}
-	<button
+	<button type="button"
 		bind:this={btnEl}
 		on:click={() => {
 			if (!dados[1]) {
