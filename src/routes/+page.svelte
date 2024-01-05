@@ -7,12 +7,12 @@
 	import TabelaGastos from '$lib/components/TabelaGastos.svelte';
 	import { onMount } from 'svelte';
 	import InputTipoPagamento from '$lib/components/InputTipoPagamento.svelte';
-	import InputEmpresa from '$lib/components/InputEmpresa.svelte';
-	import NewDropdown from '$lib/components/NewDropdown.svelte';
+	import ResultBox from '$lib/components/ResultBox.svelte';
 
 	let formSecEl: HTMLElement;
 	let vizSecEl: HTMLElement;
 	let ferramentasSecEl: HTMLElement;
+	let resultBoxEl: ResultBox;
 	function revelarSection(sec: HTMLElement) {
 		formSecEl.style.display = 'none';
 		vizSecEl.style.display = 'none';
@@ -29,9 +29,7 @@
 		revelarSection(formSecEl);
 	});
 </script>
-
 <main>
-	<InputEmpresa/>
 	<nav>
 		<button
 			on:click={() => {
@@ -51,54 +49,56 @@
 	</nav>
 	<section bind:this={formSecEl}>
 		<form on:submit={formSubmit}>
-            <!-- svelte-ignore a11y-label-has-associated-control -->
-            <label>
-                Fornecedor
-                <InputFornecedor/>
-            </label>
-            <!-- svelte-ignore a11y-label-has-associated-control -->
-            <label class="input-nf-holder">
-                Nota Fiscal
-                <InputNF />
-            </label>
-            <label>
-                Data
-                <input type="date" name="" id="">
-            </label>
-            <!-- svelte-ignore a11y-label-has-associated-control -->
-            <label>
-                Valor
-                <InputValor />
-            </label>
-            <!-- svelte-ignore a11y-label-has-associated-control -->
-            <label>
-                Setor
-                <InputSetor />
-            </label>
-            <!-- svelte-ignore a11y-label-has-associated-control -->
-            <label>
-                Caixa de entrada
-                <InputCaixa />
-            </label>
-            <!-- svelte-ignore a11y-label-has-associated-control -->
-            <label>
-                Tipo de Pagamento
-                <InputTipoPagamento/>
-            </label>
-            <label>
-                Observações
-                <textarea/>
-            </label>
-            <label>
-                <input type="submit" value="Confirmar">
-            </label>
+			<!-- svelte-ignore a11y-label-has-associated-control -->
+			<label>
+				Fornecedor
+				<InputFornecedor/>
+			</label>
+			<!-- svelte-ignore a11y-label-has-associated-control -->
+			<label class="input-nf-holder">
+				Nota Fiscal
+				<InputNF />
+			</label>
+			<label>
+				Data
+				<input type="date" name="" id="">
+			</label>
+			<!-- svelte-ignore a11y-label-has-associated-control -->
+			<label>
+				Valor
+				<InputValor />
+			</label>
+			<!-- svelte-ignore a11y-label-has-associated-control -->
+			<label>
+				Setor
+				<InputSetor />
+			</label>
+			<!-- svelte-ignore a11y-label-has-associated-control -->
+			<label>
+				Caixa de entrada
+				<InputCaixa />
+			</label>
+			<!-- svelte-ignore a11y-label-has-associated-control -->
+			<label>
+				Tipo de Pagamento
+				<InputTipoPagamento/>
+			</label>
+			<label>
+				Observações
+				<textarea/>
+			</label>
+			<label>
+				<input type="submit" value="Confirmar">
+			</label>
 		</form>
+		<div id="result-box">
+			<ResultBox bind:this={resultBoxEl}/>
+		</div>
 	</section>
 	<section bind:this={vizSecEl}>
 		<TabelaGastos />
 	</section>
 	<section bind:this={ferramentasSecEl}>
-	<NewDropdown/>
 	</section>
 </main>
 
@@ -122,13 +122,19 @@
 		overflow: auto;
 		padding: 10px;
 	}
-    form{
-        box-sizing: border-box;
+	form, #result-box{
+		box-sizing: border-box;
         width: 100%;
         max-width: 600px;
         padding: 10px;
+		margin: auto;
+	}
+	#result-box{
+		margin-top: 20px;
+		padding: 0;
+	}
+    form{
         background-color: rgb(159, 159, 159);
-        margin: auto;
     }
     form > label{
         margin: 10px;

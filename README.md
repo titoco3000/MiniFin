@@ -9,7 +9,13 @@ Componentes a serem feitos:
 - dropdowns - ok
 - ocultar dropdown no clique - ok, sketchy
 - Tabela completa - ok
+
+ Essas outras todas ok, na tabela principal
 - Tabela gasto total por fornecedor
 - Tabela gasto por area
 - Tabela compras por fornecedor
 - Tabela compras por area
+
+- mensagem sucesso & erro - ok
+
+- conectar com backend rust
