@@ -17,5 +17,5 @@ Componentes a serem feitos:
 - Tabela compras por area
 
 - mensagem sucesso & erro - ok
-
+- fazer o formulário
 - conectar com backend rust
