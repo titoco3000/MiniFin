@@ -19,3 +19,6 @@ Componentes a serem feitos:
 - mensagem sucesso & erro - ok
 - fazer o formulário
 - conectar com backend rust
+
+tive que instalar
+npm add -D @tauri-apps/api

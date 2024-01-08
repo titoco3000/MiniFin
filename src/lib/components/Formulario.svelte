@@ -6,6 +6,7 @@
 	import InputCaixa from '$lib/components/InputCaixa.svelte';
 	import InputTipoPagamento from '$lib/components/InputTipoPagamento.svelte';
 	import ResultBox from '$lib/components/ResultBox.svelte';
+	import type {Gasto} from '$lib/armazenamento';
 
 	let resultBoxEl: ResultBox;
 
@@ -20,14 +21,16 @@
 
 	function formSubmit(evento: { preventDefault: () => void }) {
 		evento.preventDefault();
-		let gasto = {
+		let gasto:Gasto = {
 			fornecedor: inputFornecedor.obterValor(),
-			NF: inputNF.obterValor(),
+			nf: inputNF.obterValor(),
 			data: inputData.value,
+			modificado: '',
 			valor: inputValor.obterValor(),
-			setor: inputSetor.obterValor(),
+			empresa: inputSetor.obterValor()[0],
+			setor: inputSetor.obterValor()[1],
 			caixa: inputCaixa.obterValor()[0],
-			tipo_de_pagamento: inputPagamento.obterValor()[0],
+			pagamento: inputPagamento.obterValor()[0],
 			obs: inputObs.value
 		};
 		console.log(JSON.stringify(gasto));

@@ -1,3 +1,5 @@
+import { invoke } from '@tauri-apps/api/tauri'
+
 interface Caixa {
 	nome: string;
 	modificado: string;
@@ -37,130 +39,26 @@ interface TipoDePagamento {
 }
 
 export async function listarCaixas(): Promise<Caixa[]> {
-	return [
-		{ nome: 'Santander', modificado: '2023-09-13' },
-		{ nome: 'Bradesco', modificado: '2023-09-13' }
-	];
+	let v:string = await invoke('listar_caixas');
+	return JSON.parse(v);
 }
 export async function listarEmpresas(): Promise<Empresa[]> {
-	return [
-		{ nome: 'Hotel', modificado: '2023-09-13' },
-		{ nome: 'Restaurante', modificado: '2023-09-13' }
-	];
+	let v:string = await invoke('listar_empresas');
+	return JSON.parse(v);
 }
 export async function listarSetores(): Promise<Setor[]> {
-	return [
-		{ nome:'Manutenção', empresa: 'Hotel', modificado: '2023-09-13' },
-		{ nome:'Equipamento', empresa: 'Restaurante', modificado: '2023-09-13' }
-	];
+	// return [
+	// 	{ nome:'Manutenção', empresa: 'Hotel', modificado: '2023-09-13' },
+	// 	{ nome:'Equipamento', empresa: 'Restaurante', modificado: '2023-09-13' }
+	// ];
+	let v:string = await invoke('listar_setores');
+	console.log(v);
+	
+	return JSON.parse(v);
 }
 export async function listarFornecedores(): Promise<Fornecedor[]> {
-	return [
-		{
-			nome: 'Maria',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria1',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria2',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria3',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria4',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria5',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria6',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria7',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria8',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria9',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria10',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'Maria11',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Hotel',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		},
-		{
-			nome: 'João',
-			modificado: '2023-09-13',
-			setor: 'manutenção',
-			empresa: 'Restaurante',
-			pagamento: 'Cartão',
-			caixa: 'Bradesco'
-		}
-	];
+	let v:string = await invoke('listar_fornecedores');
+	return JSON.parse(v);
 }
 export class FiltroGastos {
 	dataInicial = { v: '', h: false };
@@ -230,8 +128,11 @@ export async function listarGastos(filtro:FiltroGastos, sortParameter:{v:string,
 	return gastos;
 }
 export async function listarPagamentos(): Promise<TipoDePagamento[]> {
-	return [
-		{ nome: 'Cartão', modificado: '2023-09-13' },
-		{ nome: 'Dinheiro', modificado: '2023-09-13' }
-	];
+	let v:string = await invoke('listar_tipos_pagamento');
+	return JSON.parse(v);
+}
+
+export async function enviarNovoGasto(gasto:Gasto) {
+	let v:string = await invoke('registrar_gasto',{json_data: JSON.stringify(gasto)});
+	return JSON.parse(v);
 }
