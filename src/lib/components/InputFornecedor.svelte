@@ -9,7 +9,10 @@
 		if(permitirNovo)
 			valor = '';
 		else{
-			valor = fornecedores[0].nome;
+			if(fornecedores.length>0)
+				valor = fornecedores[0].nome;
+			else
+				valor = '';
 		}
 	}
 	export let permitirNovo = true;

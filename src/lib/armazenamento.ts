@@ -5,6 +5,7 @@ interface Caixa {
 	modificado: string;
 }
 interface Empresa {
+	id:number;
 	nome: string;
 	modificado: string;
 }
@@ -51,10 +52,20 @@ export async function listarSetores(): Promise<Setor[]> {
 	// 	{ nome:'Manutenção', empresa: 'Hotel', modificado: '2023-09-13' },
 	// 	{ nome:'Equipamento', empresa: 'Restaurante', modificado: '2023-09-13' }
 	// ];
-	let v:string = await invoke('listar_setores');
-	console.log(v);
+	let jsonData:string = await invoke('listar_setores');
+	let setores = JSON.parse(jsonData);
+	let empresas =  await listarEmpresas();
+	console.log('empresas:',empresas);
+	console.log('setores:',setores);
 	
-	return JSON.parse(v);
+	for (let i = 0; i < setores.length; i++) {
+		setores[i].empresa = empresas.find(obj => {
+			return obj.id === setores[i].id_empresa
+		  })?.nome;
+		delete setores[i].id_empresa;
+	} 
+	
+	return setores;
 }
 export async function listarFornecedores(): Promise<Fornecedor[]> {
 	let v:string = await invoke('listar_fornecedores');
