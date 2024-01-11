@@ -6,8 +6,7 @@
 	import InputCaixa from '$lib/components/InputCaixa.svelte';
 	import InputTipoPagamento from '$lib/components/InputTipoPagamento.svelte';
 	import ResultBox from '$lib/components/ResultBox.svelte';
-	import type {Gasto} from '$lib/armazenamento';
-
+	import {enviarNovoGasto, type Gasto} from '$lib/armazenamento';
 	let resultBoxEl: ResultBox;
 
 	let inputFornecedor: InputFornecedor;
@@ -33,7 +32,15 @@
 			pagamento: inputPagamento.obterValor()[0],
 			obs: inputObs.value
 		};
-		console.log(JSON.stringify(gasto));
+		console.log('enviando gasto');
+		
+		enviarNovoGasto(gasto).then(resposta=>{
+			if(resposta.Err){
+				let r = resposta.Err.join('\n');
+				console.log(r);
+				resultBoxEl.mensagem(r,'ruim');
+			}
+		});
 	}
 </script>
 

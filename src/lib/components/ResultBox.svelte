@@ -46,5 +46,6 @@
 		--b: blue; /*boa*/
 		--r: red; /*ruim*/
 		--n: black; /*neutra*/
+		white-space:pre;  
 	}
 </style>

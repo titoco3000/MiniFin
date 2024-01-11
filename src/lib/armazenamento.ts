@@ -144,6 +144,6 @@ export async function listarPagamentos(): Promise<TipoDePagamento[]> {
 }
 
 export async function enviarNovoGasto(gasto:Gasto) {
-	let v:string = await invoke('registrar_gasto',{json_data: JSON.stringify(gasto)});
+	let v:string = await invoke('registrar_gasto',{jsonData: JSON.stringify(gasto)});
 	return JSON.parse(v);
 }
