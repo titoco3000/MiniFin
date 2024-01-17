@@ -41,6 +41,11 @@
 				revelarSection(ferramentasSecEl);
 			}}>Ferramentas</button
 		>
+		<button on:click={() => {
+			window.location.reload()
+		}}>Reload</button
+		>
+
 	</nav>
 	<section bind:this={formSecEl}>
 		<Formulario />
