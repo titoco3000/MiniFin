@@ -1,0 +1,26 @@
+
+@font-face {
+    font-family: "Open Sans", sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    src: url('/fonts/Open_Sans/OpenSans-VariableFont_wdth,wght.ttf'); /* IE9 Compat Modes */
+    src: local(''), url('/fonts/Open_Sans/OpenSans-VariableFont_wdth,wght.ttf?#iefix') format('embedded-opentype'),
+        /* Modern Browsers */ url('/fonts/Open_Sans/OpenSans-VariableFont_wdth,wght.ttf') format('truetype'),
+}
+*{
+    font-family: "Open Sans", sans-serif;
+}
+body{
+    margin: 0;
+    padding: 0;
+
+    --cor-tema-fundo-1: #091c42;
+    --cor-tema-fundo-2: #ffffff;
+    --cor-tema-forte: #ffc90b;
+    --cor-tema-fraca: #ffeeb2;
+    --cor-tema-detalhes: #000000;
+
+}
+button{
+    cursor: pointer;
+}

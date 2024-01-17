@@ -4,6 +4,7 @@
 	import TabelaGastos from '$lib/components/TabelaGastos.svelte';
 	import { onMount } from 'svelte';
 
+	let navEl: HTMLElement;
 	let formSecEl: HTMLElement;
 	let vizSecEl: HTMLElement;
 	let ferramentasSecEl: HTMLElement;
@@ -20,24 +21,38 @@
 		console.log('submit');
 		
 	}
+
+	function changeHeaderColors(src:EventTarget|null){
+		if(src){
+			for(let child of navEl.children){
+				(child as HTMLElement).style.backgroundColor = "var(--cor-tema-fraca)";
+			}
+			(src as HTMLElement).style.backgroundColor = "var(--cor-tema-forte)";
+
+		}
+		
+	}
 	onMount(() => {
 		revelarSection(formSecEl);
 	});
 </script>
 <main>
-	<nav>
+	<nav bind:this={navEl}>
 		<button
-			on:click={() => {
+			on:click={(e) => {
+				changeHeaderColors(e.target);
 				revelarSection(formSecEl);
 			}}>Formulário</button
 		>
 		<button
-			on:click={() => {
+			on:click={(e) => {
+				changeHeaderColors(e.target);
 				revelarSection(vizSecEl);
 			}}>Visualizar</button
 		>
 		<button
-			on:click={() => {
+			on:click={(e) => {
+				changeHeaderColors(e.target);
 				revelarSection(ferramentasSecEl);
 			}}>Ferramentas</button
 		>
@@ -65,11 +80,17 @@
 		width: 100vw;
 	}
 	nav {
-		background-color: rgb(96, 96, 96);
+		background-color: var(--cor-tema-fundo-1);	
 		margin: 0;
+		padding-left: 10px;
 	}
 	nav button {
 		font-size: large;
+		margin: 10px;
+		border-width: 0;
+		border-radius: 5px;
+		background-color: var(--cor-tema-fraca);
+		padding: 10px;
 	}
 	section {
 		display: none;
