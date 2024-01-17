@@ -406,14 +406,20 @@ impl BancoDeDados {
 
     pub async fn listar_gastos_filtrados(
         &mut self,
-        data: &[&(SqlDateTime, SqlDateTime)],
-        fornecedor: &[&Fornecedor],
-        caixa: &[&CaixaDeEntrada],
-        pagamento: &[&TipoDePagamento],
-        setor: &[&Setor],
-        empresa: &[&Empresa],
-        pesquisa_obs: &[&str],
+        filtro: &FiltroGasto
+        
     ) -> Vec<Gasto> {
+        println!("Vou trabalhar com o filtro: {:#?}",filtro);
+
+
+        let data: &[&(SqlDateTime, SqlDateTime)] = &[];
+        let fornecedor: &[&Fornecedor] = &[];
+        let caixa: &[&CaixaDeEntrada] = &[];
+        let pagamento: &[&TipoDePagamento] = &[];
+        let setor: &[&Setor] = &[];
+        let empresa: &[&Empresa] = &[];
+        let pesquisa_obs: &[&str] = &[];
+
         let mut query = String::from("SELECT * from Gastos");
         let condicoes = "(".to_owned()
             + &([

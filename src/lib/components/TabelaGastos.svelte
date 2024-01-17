@@ -22,6 +22,17 @@
 
 	let filtroAplicado = new Filtro();
 	let filtroAtual = new Filtro();
+	let valoresReais = new Filtro();
+
+	let valorToggle = {
+		data_inicial: false,
+		data_final: false,
+		fornecedor: false,
+		empresa: false,
+		setor: false,
+		tipo_pagamento: false,
+		caixa: false
+	}
 
 	let filtroEl: HTMLElement;
 	let setorToggleEl: HTMLInputElement;
@@ -61,26 +72,41 @@
 	function algoModificado() {
 		//espera 1ms antes de agir para dar tempo de mudanças fazerem efeitos
 		setTimeout(() => {
+			
+			//copia valores relevantes de valoresReais para filtroAtual
+			for (const [key, value] of Object.entries(valorToggle)) {
+				if(value)
+					// @ts-ignore
+					filtroAtual[key] = valoresReais[key];
+				else
+					// @ts-ignore
+					filtroAtual[key] = [''];
+			}
 			if (!filtroAplicado.equals(filtroAtual)) {
 				// console.log('diferentes');
 			}
-		}, 1);
+		}, 0);
 	}
 
 	function reset() {
-		dataInicialEl.value = '';
-		dataFinalEl.value = '';
+		console.log('resetting');
+		
+		valoresReais.data_inicial[0] = new Date().toISOString().split('T')[0];
+		valoresReais.data_final[0] = new Date().toISOString().split('T')[0];
 		fornecedorEl.reset();
 		empresaEl.reset();
 		setorEl.reset();
 		pagamentoEl.reset();
 		caixaEl.reset();
 		setTimeout(() => {
+			console.log('valoresReais',valoresReais);
+			
 			filtroEl.querySelectorAll<HTMLInputElement>("input[type='checkbox']").forEach((e) => {
 				if (e.checked) {
 					e.click();
 				}
 			});
+			carregarGastosComNovoFiltro();
 		}, 1);
 	}
 
@@ -90,6 +116,8 @@
 		carregarGastos();
 	}
 	function carregarGastos() {
+		console.log(filtroAplicado);
+		
 		listarGastos(filtroAplicado, sortParameter).then((gastos) => {
 			gastosFiltrados = gastos;
 			somatorioValor = gastosFiltrados.reduce((a, b) => {
@@ -98,13 +126,13 @@
 		});
 	}
 	function setorModificado(v: string[]) {
-		if (filtroAtual.empresa.h && filtroAtual.empresa.v[0] != v[0]) {
+		if (filtroAtual.empresa.length>0 && filtroAtual.empresa[0] != v[0]) {
 			setTimeout(() => empresaToggleEl.click(), 1);
 		}
 		algoModificado();
 	}
 	function empresaModificada(v: string[]) {
-		if (filtroAtual.setor.h && filtroAtual.setor.v[0] != v[0]) {
+		if (filtroAtual.setor.length>0 && filtroAtual.setor[0] != v[0]) {
 			setTimeout(() => setorToggleEl.click(), 1);
 		}
 		algoModificado();
@@ -136,7 +164,7 @@
 	}
 	onMount(() => {
 		digitosNF = obterDigitosNF();
-		carregarGastosComNovoFiltro();
+		reset();
 	});
 </script>
 
@@ -150,14 +178,14 @@
 					<input
 						type="date"
 						on:input={algoModificado}
-						bind:value={filtroAtual.dataInicial.v}
+						bind:value={valoresReais.data_inicial}
 						bind:this={dataInicialEl}
 					/>
 				</div>
 				<input
 					type="checkbox"
 					on:change={selecionarFiltro}
-					bind:checked={filtroAtual.dataInicial.h}
+					bind:checked={valorToggle.data_inicial}
 				/>
 			</div>
 		</div>
@@ -168,14 +196,14 @@
 					<input
 						type="date"
 						on:input={algoModificado}
-						bind:value={filtroAtual.dataFinal.v}
+						bind:value={valoresReais.data_final}
 						bind:this={dataFinalEl}
 					/>
 				</div>
 				<input
 					type="checkbox"
 					on:change={selecionarFiltro}
-					bind:checked={filtroAtual.dataFinal.h}
+					bind:checked={valorToggle.data_final}
 				/>
 			</div>
 		</div>
@@ -186,14 +214,14 @@
 					<InputFornecedor
 						onEdit={algoModificado}
 						permitirNovo={false}
-						bind:valor={filtroAtual.fornecedor.v}
+						bind:valor={valoresReais.fornecedor[0]}
 						bind:this={fornecedorEl}
 					/>
 				</div>
 				<input
 					type="checkbox"
 					on:change={selecionarFiltro}
-					bind:checked={filtroAtual.fornecedor.h}
+					bind:checked={valorToggle.fornecedor}
 				/>
 			</div>
 		</div>
@@ -203,7 +231,7 @@
 				<div class="input-holder">
 					<InputEmpresa
 						onEdit={empresaModificada}
-						bind:valor={filtroAtual.empresa.v}
+						bind:valor={valoresReais.empresa}
 						bind:this={empresaEl}
 					/>
 				</div>
@@ -211,12 +239,12 @@
 					type="checkbox"
 					on:change={(e) => {
 						if (e.currentTarget.checked) {
-							empresaModificada(filtroAtual.empresa.v);
+							empresaModificada(valoresReais.empresa);
 						}
 
 						selecionarFiltro(e);
 					}}
-					bind:checked={filtroAtual.empresa.h}
+					bind:checked={valorToggle.empresa}
 					bind:this={empresaToggleEl}
 				/>
 			</div>
@@ -227,7 +255,7 @@
 				<div class="input-holder">
 					<InputSetor
 						onEdit={setorModificado}
-						bind:valor={filtroAtual.setor.v}
+						bind:valor={valoresReais.setor}
 						bind:this={setorEl}
 					/>
 				</div>
@@ -235,11 +263,11 @@
 					type="checkbox"
 					on:change={(e) => {
 						if (e.currentTarget.checked) {
-							setorModificado(filtroAtual.setor.v);
+							setorModificado(valoresReais.setor);
 						}
 						selecionarFiltro(e);
 					}}
-					bind:checked={filtroAtual.setor.h}
+					bind:checked={valorToggle.setor}
 					bind:this={setorToggleEl}
 				/>
 			</div>
@@ -250,14 +278,14 @@
 				<div class="input-holder">
 					<InputTipoPagamento
 						onEdit={algoModificado}
-						bind:valor={filtroAtual.pagamento.v}
+						bind:valor={valoresReais.tipo_pagamento}
 						bind:this={pagamentoEl}
 					/>
 				</div>
 				<input
 					type="checkbox"
 					on:change={selecionarFiltro}
-					bind:checked={filtroAtual.pagamento.h}
+					bind:checked={valorToggle.tipo_pagamento}
 				/>
 			</div>
 		</div>
@@ -267,11 +295,11 @@
 				<div class="input-holder">
 					<InputCaixa
 						onEdit={algoModificado}
-						bind:valor={filtroAtual.caixa.v}
+						bind:valor={valoresReais.caixa}
 						bind:this={caixaEl}
 					/>
 				</div>
-				<input type="checkbox" on:change={selecionarFiltro} bind:checked={filtroAtual.caixa.h} />
+				<input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.caixa} />
 			</div>
 		</div>
 		<button on:click={reset}>Remover Filtros</button>

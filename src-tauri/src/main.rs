@@ -5,8 +5,8 @@ pub mod storage;
 pub mod tipos;
 
 use futures::executor;
-use std::sync::Mutex;
 use std::path::PathBuf;
+use std::sync::Mutex;
 use storage::BancoDeDados;
 
 pub type SqlDateTime = sqlx::types::chrono::NaiveDate;
@@ -70,26 +70,42 @@ fn registrar_gasto(database: tauri::State<'_, Mutex<BancoDeDados>>, json_data: &
     .unwrap()
 }
 
-fn main() {
-    println!("{:?}",storage::obter_local_padrao());
-    let database = Mutex::new( 
-        match executor::block_on(storage::BancoDeDados::abrir()) {
-            Ok(db)=>db,
-            Err(_)=>{
-                executor::block_on(storage::criar_database(&PathBuf::from(
-                "/home/tito/Documents/raja.db",
-                ))).unwrap();
-                executor::block_on(storage::BancoDeDados::abrir()).unwrap()
-            }
-        }
-    );
+#[tauri::command]
+fn listar_gastos(database: tauri::State<'_, Mutex<BancoDeDados>>, filtro: tipos::FiltroGasto) -> String {
+    println!("rs recebeu {:#?}",filtro);
+    serde_json::to_string(&executor::block_on(
+        database
+            .lock()
+            .unwrap()
+            .listar_gastos_filtrados(&filtro),
+    ))
+    .unwrap()
+}
 
-    if executor::block_on(database.lock().unwrap().listar_caixas()).is_empty(){
+fn main() {
+    println!("{:?}", storage::obter_local_padrao());
+    let database = Mutex::new(match executor::block_on(storage::BancoDeDados::abrir()) {
+        Ok(db) => db,
+        Err(_) => {
+            executor::block_on(storage::criar_database(&PathBuf::from(
+                "/home/tito/Documents/raja.db",
+            )))
+            .unwrap();
+            executor::block_on(storage::BancoDeDados::abrir()).unwrap()
+        }
+    });
+
+    if executor::block_on(database.lock().unwrap().listar_caixas()).is_empty() {
         executor::block_on(database.lock().unwrap().registrar_basicos(
-            &["Santander","Bradesco"],
-            &["Hotel","Restaurante"],
-            &[("Manutenção","Hotel"),("Manutenção","Restaurante"),("Lavanderia","Hotel"),("Comida","Restaurante")],
-            &["Cartão","Dinheiro"]
+            &["Santander", "Bradesco"],
+            &["Hotel", "Restaurante"],
+            &[
+                ("Manutenção", "Hotel"),
+                ("Manutenção", "Restaurante"),
+                ("Lavanderia", "Hotel"),
+                ("Comida", "Restaurante"),
+            ],
+            &["Cartão", "Dinheiro"],
         ))
     }
 
@@ -101,6 +117,7 @@ fn main() {
             listar_setores,
             listar_empresas,
             listar_fornecedores,
+            listar_gastos,
             validar_gasto,
             registrar_gasto
         ])
