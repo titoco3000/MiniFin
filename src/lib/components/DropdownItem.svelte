@@ -31,7 +31,7 @@
 		bind:this={btnEl}
 		on:click={() => {
 			bubbleUp([dados]);
-		}}><p>{dados}</p></button
+		}}>{dados}</button
 	>
 	{:else}
 	<button type="button"
@@ -40,7 +40,7 @@
 			if (!dados[1]) {
 				bubbleUp([dados[0]]);
 			}
-		}}><p>{dados[0]}</p></button
+		}}>{dados[0]}</button
 	>
 	<ul>
 		{#each dados[1] || [] as dado}

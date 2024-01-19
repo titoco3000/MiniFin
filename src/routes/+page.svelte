@@ -2,7 +2,9 @@
 	
 	import Formulario from '$lib/components/Formulario.svelte';
 	import TabelaGastos from '$lib/components/TabelaGastos.svelte';
+	import InputSetor from '$lib/components/InputSetor.svelte';
 	import { onMount } from 'svelte';
+	import Dropdown from '$lib/components/Dropdown.svelte';
 
 	let navEl: HTMLElement;
 	let formSecEl: HTMLElement;
@@ -69,6 +71,9 @@
 		<TabelaGastos />
 	</section>
 	<section bind:this={ferramentasSecEl}>
+		<div class="temp">
+			<Dropdown dados={[['A', [['1','N'], '2', '3']], ['B'], ['C', ['1', '2', ['3D', ['1', '2']]]]]} />
+		</div>
 	</section>
 </main>
 
@@ -97,5 +102,10 @@
 		flex: 1;
 		overflow: auto;
 		padding: 0px;
+	}
+	.temp{
+		width: 600px;
+		margin: auto;
+		margin-top: 20px;
 	}
 </style>
