@@ -40,7 +40,7 @@
 			}
 			while (digitosAtuais > digitos) {
 				if (s[s.length - 1] != '-') digitosAtuais--;
-				s = s.slice(0, s.length - 1);
+				s = s.slice(1);
 			}
 
 			// valor = s;
