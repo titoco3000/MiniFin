@@ -143,14 +143,14 @@
 		padding-left: 8%;
 		padding-right: 8%;
 		background-color: var(--cor-tema-fundo-2);
-		/* border: 1px solid var(--cor-tema-fundo-3); */
-		/* box-shadow: 5px 5px 5px var(--cor-tema-fundo-3); */
 		position: relative;
-		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 		border-radius: 5px;
-
+		
 		/* padding: 10%; */
 		text-align: center;
+	}
+	form, input[type='submit']{
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 	}
 	section {
 		display: flex;
@@ -177,7 +177,7 @@
 	}
 	div {
 		box-sizing: border-box;
-		margin-top: 20px;
+		margin-top: 0px;
 		font-size: 16px;
 		text-align: left;
 		padding: 10px;

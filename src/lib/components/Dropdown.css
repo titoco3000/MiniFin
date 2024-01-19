@@ -53,7 +53,7 @@
 }
 
 :global(.dropdown-main:focus-within ul button) {
-	height: 40px;
+	height: 30px;
 	border-color: black;
 }
 

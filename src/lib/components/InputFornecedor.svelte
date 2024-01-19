@@ -172,6 +172,9 @@
 		display: flex;
 		width: 100%;
 	}
+	main:focus-within label{
+		border-radius: 0;
+	}
 	input {
 		margin: 0;
 		border: 0;
@@ -186,15 +189,14 @@
 		background-color: white;
 		width: 100%;
 		box-sizing: border-box;
-		top: 21px;
+		top: 22px;
 		z-index: 10;
-		border: 2px solid black;
 		border-top: 0;
 	}
 	li {
-		border: 2px solid black;
+		border: 1px solid black;
 		overflow: hidden;
-		border-width: 0 1px 0 1px;
+		border-width: 0px;
 		max-height: 0;
 		transition: max-height 0.14s, border-width 0.07s;
 	}
@@ -204,8 +206,8 @@
 		border: none;
 	}
 	main:focus-within li{
-		border-width: 1px;
-		max-height: 20px;
+		border-width: 0 1px 1px 1px;
+		max-height: 30px;
 	}
 
 	main:has(label button:not(:focus)) li:nth-child(n+6) {
