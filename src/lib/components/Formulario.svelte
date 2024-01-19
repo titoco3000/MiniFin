@@ -48,6 +48,8 @@
 				
 				inputValor.reset();
 				inputData.value = new Date().toISOString().split('T')[0];
+				inputNF.reset();
+				inputObs.value = '';
 				
 			}
 			document.getElementById("result-box")?.scrollIntoView({ behavior: "smooth" });
@@ -62,14 +64,15 @@
 		<section>
 			<!-- svelte-ignore a11y-div-has-associated-control -->
 			<div class="medium">
-				Fornecedor
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label>Fornecedor</label>
 				<div>
 					<InputFornecedor bind:this={inputFornecedor} />
 				</div>
 			</div>
-			<!-- svelte-ignore a11y-div-has-associated-control -->
 			<div class="medium">
-				Nota Fiscal
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label>Nota Fiscal</label>
 				<div>
 					<InputNF bind:this={inputNF} />
 				</div>
