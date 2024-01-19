@@ -514,13 +514,22 @@ impl BancoDeDados {
                     || f.id_tipo_pagamento != pagamento_preferido.id
                     || f.id_caixa != caixa_preferido.id
                 {
-                    println!("Fornecedor existe! Atualizando...");
+                    println!("Fornecedor existe! Atualizando:\n{}",&format!(
+                        "UPDATE Fornecedores SET 
+                                id_setor = {},
+                                id_tipo_pagamento = {},
+                                id_caixa = {},
+                                modificado = date('now','localtime')
+                            WHERE id = {};
+                            ",
+                        setor_preferido.id, pagamento_preferido.id, caixa_preferido.id, f.id
+                    ));
                     sqlx::query(&format!(
                         "UPDATE Fornecedores SET 
                                 id_setor = {},
                                 id_tipo_pagamento = {},
                                 id_caixa = {},
-                                modificado = (date('now','localtime')
+                                modificado = date('now','localtime')
                             WHERE id = {};
                             ",
                         setor_preferido.id, pagamento_preferido.id, caixa_preferido.id, f.id
@@ -1037,7 +1046,7 @@ impl BancoDeDados {
         sqlx::query(&format!(
             "UPDATE Gastos SET 
                     id_fornecedor = {},
-                    modificado = (date('now','localtime')
+                    modificado = date('now','localtime')
                 WHERE id_fornecedor = {};
                 ",
             novo.id, original.id
