@@ -50,6 +50,9 @@
 				inputData.value = new Date().toISOString().split('T')[0];
 				
 			}
+			document.getElementById("result-box")?.scrollIntoView({ behavior: "smooth" });
+			console.log('scrolling into');
+			
 		});
 	}
 </script>
