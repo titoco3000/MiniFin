@@ -96,6 +96,6 @@
 		display: none;
 		flex: 1;
 		overflow: auto;
-		padding: 10px;
+		padding: 0px;
 	}
 </style>

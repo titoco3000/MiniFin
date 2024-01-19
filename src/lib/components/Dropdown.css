@@ -12,6 +12,13 @@
 	width: 100%;
 	text-align: start;
 	padding: 2px;
+	height: 40px;
+	font-size: 16px;
+	border-radius: var(--tema-border-radius);
+	transition: border-radius .3s;
+}
+:global(.dropdown-main:focus-within > button){
+	border-radius: 0;
 }
 :global(.dropdown-main > p){
     background-color: white;
@@ -26,7 +33,7 @@
 :global(.dropdown-main button) {
 	background-color: white;
 	overflow: hidden;
-	border: 1px solid black;
+	border: 2px solid black;
     display: block;
     cursor:auto;
 }
@@ -46,6 +53,7 @@
 /* texto da primeira coluna */
 :global(.dropdown-main > ul > li > button) {
 	min-width: 100px;
+	border-radius: 0;
 }
 :global(.dropdown-main:focus-within > ul > li > button) {
 	min-width: 100px;

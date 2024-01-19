@@ -160,13 +160,15 @@
 		padding: 0;
 		display: flex;
 		width: 100%;
+		height: 40px;
 		/* box-sizing: border-box; */
 		background-color: white;
 	}
 	label {
 		position: relative;
 		padding: 0;
-		border: 1px solid black;
+		border: 2px solid black;
+		border-radius: var(--tema-border-radius);
 		display: flex;
 		width: 100%;
 	}
@@ -184,11 +186,13 @@
 		background-color: white;
 		width: 100%;
 		box-sizing: border-box;
-		top: 2.5px;
+		top: 21px;
 		z-index: 10;
+		border: 2px solid black;
+		border-top: 0;
 	}
 	li {
-		border: solid black;
+		border: 2px solid black;
 		overflow: hidden;
 		border-width: 0 1px 0 1px;
 		max-height: 0;
@@ -212,7 +216,7 @@
 	.show-suggestions {
 		background-image: url('./media/down-arrow.svg');
 		background-size: calc(100% - 5px) auto;
-		min-width: 15px;
+		min-width: 30px;
 		background-repeat: no-repeat;
 		background-position: center center;
 		border: 0;

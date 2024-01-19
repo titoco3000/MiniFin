@@ -1,0 +1,41 @@
+<!-- svelte-ignore a11y-label-has-associated-control -->
+		<label>
+			Fornecedor
+			<InputFornecedor bind:this={inputFornecedor} />
+		</label>
+		<!-- svelte-ignore a11y-label-has-associated-control -->
+		<label class="input-nf-holder">
+			Nota Fiscal
+			<InputNF bind:this={inputNF} />
+		</label>
+		<label>
+			Data
+			<input type="date" name="" id="" bind:this={inputData} />
+		</label>
+		<!-- svelte-ignore a11y-label-has-associated-control -->
+		<label>
+			Valor
+			<InputValor bind:this={inputValor} />
+		</label>
+		<!-- svelte-ignore a11y-label-has-associated-control -->
+		<label>
+			Setor
+			<InputSetor bind:this={inputSetor} />
+		</label>
+		<!-- svelte-ignore a11y-label-has-associated-control -->
+		<label>
+			Caixa de entrada
+			<InputCaixa bind:this={inputCaixa} />
+		</label>
+		<!-- svelte-ignore a11y-label-has-associated-control -->
+		<label>
+			Tipo de Pagamento
+			<InputTipoPagamento bind:this={inputPagamento} />
+		</label>
+		<label>
+			Observações
+			<textarea bind:this={inputObs} />
+		</label>
+		<label>
+			<input type="submit" value="Confirmar" />
+		</label>

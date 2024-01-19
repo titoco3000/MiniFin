@@ -74,6 +74,10 @@
 		flex-grow: 1;
 		min-width: 0;
 		outline: none;
-		border: 1px solid black;
+		border: 2px solid var(--cor-tema-detalhes);
+		border-radius: var(--tema-border-radius);
+		font-size: 16px;
+		height: 40px;
+		box-sizing: border-box;
 	}
 </style>

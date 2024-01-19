@@ -74,6 +74,7 @@
 		padding: 0;
 		display: flex;
 		width: 100%;
+		height: 100%;
 		/* box-sizing: border-box; */
 	}
 	input {
@@ -82,6 +83,8 @@
 		flex-grow: 1;
 		min-width: 0;
 		outline: none;
-		border: 1px solid black;
+		border: 2px solid var(--cor-tema-detalhes);
+		border-radius: var(--tema-border-radius);
+		height: 100%;
 	}
 </style>

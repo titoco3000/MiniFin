@@ -6,7 +6,7 @@
 	import InputCaixa from '$lib/components/InputCaixa.svelte';
 	import InputTipoPagamento from '$lib/components/InputTipoPagamento.svelte';
 	import ResultBox from '$lib/components/ResultBox.svelte';
-	import {enviarNovoGasto, type Gasto} from '$lib/armazenamento';
+	import { enviarNovoGasto, type Gasto } from '$lib/armazenamento';
 	let resultBoxEl: ResultBox;
 
 	let inputFornecedor: InputFornecedor;
@@ -20,7 +20,7 @@
 
 	function formSubmit(evento: { preventDefault: () => void }) {
 		evento.preventDefault();
-		let gasto:Gasto = {
+		let gasto: Gasto = {
 			fornecedor: inputFornecedor.obterValor(),
 			nf: inputNF.obterValor(),
 			data: inputData.value,
@@ -33,12 +33,12 @@
 			obs: inputObs.value
 		};
 		console.log('enviando gasto');
-		
-		enviarNovoGasto(gasto).then(resposta=>{
-			if(resposta.Err){
+
+		enviarNovoGasto(gasto).then((resposta) => {
+			if (resposta.Err) {
 				let r = resposta.Err.join('\n');
 				console.log(r);
-				resultBoxEl.mensagem(r,'ruim');
+				resultBoxEl.mensagem(r, 'ruim');
 			}
 		});
 	}
@@ -46,47 +46,68 @@
 
 <main>
 	<form on:submit={formSubmit}>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label>
-			Fornecedor
-			<InputFornecedor bind:this={inputFornecedor} />
-		</label>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label class="input-nf-holder">
-			Nota Fiscal
-			<InputNF bind:this={inputNF} />
-		</label>
-		<label>
-			Data
-			<input type="date" name="" id="" bind:this={inputData} />
-		</label>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label>
-			Valor
-			<InputValor bind:this={inputValor} />
-		</label>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label>
-			Setor
-			<InputSetor bind:this={inputSetor} />
-		</label>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label>
-			Caixa de entrada
-			<InputCaixa bind:this={inputCaixa} />
-		</label>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label>
-			Tipo de Pagamento
-			<InputTipoPagamento bind:this={inputPagamento} />
-		</label>
-		<label>
-			Observações
-			<textarea bind:this={inputObs} />
-		</label>
-		<label>
-			<input type="submit" value="Confirmar" />
-		</label>
+		<section>
+			<!-- svelte-ignore a11y-div-has-associated-control -->
+			<div class="medium">
+				Fornecedor
+				<div>
+					<InputFornecedor bind:this={inputFornecedor} />
+				</div>
+			</div>
+			<!-- svelte-ignore a11y-div-has-associated-control -->
+			<div class="medium">
+				Nota Fiscal
+				<div>
+					<InputNF bind:this={inputNF} />
+				</div>
+			</div>
+			<div class="small">
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label>Data</label> 
+				<div>
+					<input type="date" bind:this={inputData} value={new Date().toISOString().split('T')[0]} />
+				</div>
+			</div>
+			<div class="small">
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label>Valor</label>
+				<div>
+					<InputValor bind:this={inputValor} />
+				</div>
+			</div>
+			
+			<div class="medium">
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label>Setor</label>
+				<div>
+					<InputSetor bind:this={inputSetor} />
+				</div>
+			</div>
+			
+			<div class="medium">
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label>Caixa de Entrada</label>
+				
+				<div>
+					<InputCaixa bind:this={inputCaixa} />
+				</div>
+			</div>
+			<div class="medium">
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label>Tipo de Pagamento</label>
+				<div>
+					<InputTipoPagamento bind:this={inputPagamento} />
+				</div>
+			</div>
+			<div class="large">
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label>Observações</label>
+				<div class="text-area-holder">
+					<textarea bind:this={inputObs} />
+				</div>
+			</div>
+		</section>
+		<input type="submit" value="Confirmar" />
 	</form>
 	<div id="result-box">
 		<ResultBox bind:this={resultBoxEl} />
@@ -100,26 +121,78 @@
 	form,
 	#result-box {
 		box-sizing: border-box;
-		width: 100%;
-		max-width: 600px;
-		padding: 10px;
+		width: 90%;
+		max-width: 900px;
 		margin: auto;
+		margin-top: 40px;
 	}
 	#result-box {
-		margin-top: 20px;
 		padding: 0;
 	}
 	form {
-		background-color: rgb(159, 159, 159);
+		padding-left: 8%;
+		padding-right: 8%;
+		background-color: var(--cor-tema-fundo-2);
+		/* border: 1px solid var(--cor-tema-fundo-3); */
+		/* box-shadow: 5px 5px 5px var(--cor-tema-fundo-3); */
+		position: relative;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+		border-radius: 5px;
+
+		/* padding: 10%; */
+		text-align: center;
 	}
-	form > label {
-		margin: 10px;
+	section {
+		display: flex;
+		flex-flow: row wrap;
 	}
-	.input-nf-holder {
-		width: 10em;
+	.small {
+		width: 25%;
+		min-width: 150px;
+	}
+	.medium {
+		width: 50%;
+	}
+	.large {
+		width: 100%;
+	}
+	input[type='submit'] {
+		font-size: 22px;
+		background-color: var(--cor-tema-forte);
+		border: none;
+		border-radius: var(--tema-border-radius);
+		padding: 10px;
+		margin-top: 50px;
+		margin-bottom: 30px;
+	}
+	div {
+		box-sizing: border-box;
+		margin-top: 20px;
+		font-size: 16px;
+		text-align: left;
+		padding: 10px;
+	}
+	div > div {
+		padding: 0px;
+		/* border: 1px dashed black; */
+		box-sizing: border-box;
+		width: 100%;
+		height: 40px;
+		margin: 0;
+	}
+	.text-area-holder {
+		height: 120px;
 	}
 	textarea {
+		padding: 10px;
+		margin: 0;
 		width: 100%;
+		height: 100%;
 		resize: none;
+		box-sizing: border-box;
+		border: 2px solid var(--cor-tema-detalhes);
+		border-radius: var(--tema-border-radius);
+		outline: none;
+		/* border-width: 0px; */
 	}
 </style>

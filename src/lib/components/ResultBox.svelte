@@ -39,6 +39,7 @@
 		box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
 		overflow: hidden;
         opacity: 0%;
+		padding: 4%;
 	}
 	p {
         padding: 10px;
