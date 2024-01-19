@@ -40,6 +40,16 @@
 				console.log(r);
 				resultBoxEl.mensagem(r, 'ruim');
 			}
+			if(resposta.Ok){
+				resposta.Ok.unshift("Sucesso!");
+				let r = resposta.Ok.join('\n');
+				console.log(r);
+				resultBoxEl.mensagem(r, 'bom');
+				
+				inputValor.reset();
+				inputData.value = new Date().toISOString().split('T')[0];
+				
+			}
 		});
 	}
 </script>

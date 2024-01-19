@@ -1,41 +1,95 @@
-<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label>
-			Fornecedor
-			<InputFornecedor bind:this={inputFornecedor} />
-		</label>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label class="input-nf-holder">
-			Nota Fiscal
-			<InputNF bind:this={inputNF} />
-		</label>
-		<label>
-			Data
-			<input type="date" name="" id="" bind:this={inputData} />
-		</label>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label>
-			Valor
-			<InputValor bind:this={inputValor} />
-		</label>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label>
-			Setor
-			<InputSetor bind:this={inputSetor} />
-		</label>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label>
-			Caixa de entrada
-			<InputCaixa bind:this={inputCaixa} />
-		</label>
-		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label>
-			Tipo de Pagamento
-			<InputTipoPagamento bind:this={inputPagamento} />
-		</label>
-		<label>
-			Observações
-			<textarea bind:this={inputObs} />
-		</label>
-		<label>
-			<input type="submit" value="Confirmar" />
-		</label>
+:global(.dropdown-main *)  {
+	margin: 0;
+	padding: 0;
+}
+:global(.dropdown-main) {
+	position: relative;
+	width: 100%;
+	--tempo-rolamento: .3s;
+}
+:global(.dropdown-main > button){
+	display: block;
+	width: 100%;
+	text-align: start;
+	padding: 2px;
+	height: 40px;
+	font-size: 16px;
+	border-radius: var(--tema-border-radius);
+	transition: border-radius .3s;
+}
+:global(.dropdown-main:focus-within > button){
+	border-radius: 0;
+}
+:global(.dropdown-main > p){
+    background-color: white;
+	overflow: hidden;
+    margin: 0;
+}
+:global(.dropdown-main ul) {
+	list-style: none;
+	position: absolute;
+	z-index: 10;
+}
+:global(.dropdown-main button) {
+	background-color: white;
+	overflow: hidden;
+	border: 2px solid black;
+    display: block;
+    cursor:auto;
+}
+:global(.dropdown-main ul p){
+    margin: 1px;
+}
+:global(.dropdown-main li) {
+	position: relative;
+}
+
+/* todas listas que não a primeira */
+:global(.dropdown-main ul li ul) {
+    top: 0;
+	left: 100%;
+}
+
+/* texto da primeira coluna */
+:global(.dropdown-main > ul > li > button) {
+	min-width: 100px;
+	border-radius: 0;
+}
+:global(.dropdown-main:focus-within > ul > li > button) {
+	min-width: 100px;
+    border-width: 1px;
+	border-top-width: 0;
+}
+
+/* Todos os textos em listas */
+:global(.dropdown-main > ul button) {
+	max-height: 0;
+    border-width: 0;
+	text-align: left;
+    transition: max-height var(--tempo-rolamento), border-width var(--tempo-rolamento);
+}
+:global(.dropdown-main:focus-within > ul button) {
+    max-height: 2em;
+    /* transition: max-height var(--tempo-rolamento); */
+}
+/* Texto de todas colunas exceto primeira */
+:global(.dropdown-main li > ul > li > button) {
+	max-width: 0;
+	min-width: 0;
+	border-width: 0;
+	overflow: hidden;
+	transition:
+		max-width var(--tempo-rolamento),
+		min-width var(--tempo-rolamento),
+        max-height var(--tempo-rolamento),
+        border-width calc( var(--tempo-rolamento) / 2);
+}
+:global(.dropdown-main > ul li:hover > ul > li > button) {
+	max-width: 100%;
+	min-width: 100px;
+    border-width: 1px;
+	transition:
+		max-width var(--tempo-rolamento),
+		min-width var(--tempo-rolamento), 
+		border-width calc( var(--tempo-rolamento) / 2);
+}

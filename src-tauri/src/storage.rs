@@ -566,16 +566,18 @@ impl BancoDeDados {
         tipo_pagamento: &TipoDePagamento,
         fornecedor: &Fornecedor,
         obs: String,
-    ) -> Result<(), Vec<String>> {
+    ) -> Result<Vec<String>, Vec<String>> {
         println!("Registrar gasto()");
         let mut problemas = Vec::with_capacity(9);
 
+        
         if self.obter_gasto(&fornecedor, nf).await.is_some() {
-            problemas.push(String::from("nf já ultilizada para esse fornecedor"));
+            problemas.push(String::from("NF já ultilizada para esse fornecedor"));
         }
-
+        
         if problemas.len() == 0 {
             println!("sem problemas até aqui");
+                        
             match sqlx::query(&format!(
                 "INSERT INTO Gastos 
                     (valor, nf, data, id_setor, id_caixa, id_tipo_pagamento, id_fornecedor, obs)
@@ -594,7 +596,7 @@ impl BancoDeDados {
             .execute(&self.0)
             .await
             {
-                Ok(_) => Ok(()),
+                Ok(_) => Ok(Vec::new()),
                 Err(e) => {
                     problemas.push(format!("Erro SQL: {}", e));
                     println!("Erro SQL: {}", e);
@@ -612,7 +614,7 @@ impl BancoDeDados {
        formato de data incorreto
        nenhuma nf recebida"
     */
-    pub async fn registrar_gasto_de_json(&mut self, json_str: &str) -> Result<(), Vec<String>> {
+    pub async fn registrar_gasto_de_json(&mut self, json_str: &str) -> Result<Vec<String>, Vec<String>> {
         println!("Recebi json: {}", json_str);
         let mut problemas = Vec::with_capacity(9);
 
@@ -708,9 +710,14 @@ impl BancoDeDados {
                 None
             };
 
+            let mut eh_novo_fornecedor = false;
+
             let fornecedor =
                 if let serde_json::Value::String(fornecedor_str) = &json_obj["fornecedor"] {
                     if setor.is_some() && tipo_pagamento.is_some() && caixa.is_some() {
+                        
+                        eh_novo_fornecedor = !self.listar_fornecedores().await.iter().find(|&x| &x.nome == fornecedor_str).is_some();
+
                         match self
                             .registrar_ou_atualizar_fornecedor(
                                 &fornecedor_str,
@@ -770,7 +777,7 @@ impl BancoDeDados {
                 && tipo_pagamento.is_some()
                 && fornecedor.is_some()
             {
-                return self
+                return match self
                     .registrar_gasto(
                         valor.unwrap(),
                         nf.unwrap(),
@@ -781,7 +788,15 @@ impl BancoDeDados {
                         &fornecedor.unwrap(),
                         obs,
                     )
-                    .await;
+                    .await{
+                        Ok(mut vetor)=>{
+                            if eh_novo_fornecedor{
+                                vetor.push("Novo fornecedor adicionado".to_string());
+                            }
+                            return Ok(vetor);
+                        }
+                        Err(e) => Err(e)
+                    }
             }
         }
         Err(problemas)
@@ -870,12 +885,12 @@ impl BancoDeDados {
                 match nf_str.parse::<u32>() {
                     Ok(v) => Some(v),
                     Err(_) => {
-                        problemas.push(String::from("formato da nf incorreto"));
+                        problemas.push(String::from("formato da NF incorreto"));
                         None
                     }
                 }
             } else {
-                problemas.push(String::from("nenhuma nf recebida"));
+                problemas.push(String::from("nenhuma NF recebida"));
                 None
             };
 
