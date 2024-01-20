@@ -5,7 +5,6 @@ pub mod storage;
 pub mod tipos;
 
 use futures::executor;
-use sqlx::database;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use storage::BancoDeDados;

@@ -1,5 +1,4 @@
 use futures::executor;
-use futures::future;
 use serde::Serialize;
 use sqlx::migrate::MigrateDatabase;
 use sqlx::Pool;
