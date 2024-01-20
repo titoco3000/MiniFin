@@ -5,6 +5,7 @@ pub mod storage;
 pub mod tipos;
 
 use futures::executor;
+use sqlx::database;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use storage::BancoDeDados;
@@ -71,12 +72,12 @@ fn registrar_gasto(database: tauri::State<'_, Mutex<BancoDeDados>>, json_data: &
 }
 
 #[tauri::command]
-fn listar_gastos(database: tauri::State<'_, Mutex<BancoDeDados>>, filtro: tipos::FiltroGasto) -> String {
+fn listar_gastos(
+    database: tauri::State<'_, Mutex<BancoDeDados>>,
+    filtro: tipos::FiltroGasto,
+) -> String {
     serde_json::to_string(&executor::block_on(
-        database
-            .lock()
-            .unwrap()
-            .listar_gastos_filtrados(&filtro),
+        database.lock().unwrap().listar_gastos_filtrados_descompactados(&filtro),
     ))
     .unwrap()
 }

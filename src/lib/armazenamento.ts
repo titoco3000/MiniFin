@@ -80,6 +80,7 @@ export class FiltroGastos {
 	setor:string[] = [''];
 	tipo_pagamento:string[] = [''];
 	caixa:string[] = [''];
+	obs_pesquisa:string[] = [''];
 
 	equals(outro: FiltroGastos) {
 		return JSON.stringify(this) == JSON.stringify(outro);
@@ -90,6 +91,8 @@ export async function listarGastos(filtro:FiltroGastos, sortParameter:{v:string,
 	let jsonified = JSON.stringify(filtro);
 	console.log("Pedindo com parametro:",jsonified);
 	let v:string = await invoke('listar_gastos',{filtro: filtro});
+	console.log("Recebi; ",JSON.parse(v));
+	
 	return JSON.parse(v);
 	// let todos = [
 	// 	{

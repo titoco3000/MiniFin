@@ -1,4 +1,5 @@
 use futures::executor;
+use futures::future;
 use serde::Serialize;
 use sqlx::migrate::MigrateDatabase;
 use sqlx::Pool;
@@ -162,6 +163,9 @@ impl BancoDeDados {
         let local_banco = Config::ler()?.local_banco_de_dados;
         let db_url = "sqlite://".to_string() + &local_banco.to_str().unwrap();
         let pool = sqlx::SqlitePool::connect(&db_url).await?;
+
+        //teste funciona!
+
         Ok(BancoDeDados(pool))
     }
 
@@ -172,10 +176,10 @@ impl BancoDeDados {
             ",
             nome
         ))
-        .fetch_one(&self.0)
+        .fetch_optional(&self.0)
         .await
         {
-            Ok(pagamento) => Some(pagamento),
+            Ok(pagamento) => pagamento,
             Err(e) => {
                 eprintln!("line {}: {}", line!(), e);
                 None
@@ -189,10 +193,10 @@ impl BancoDeDados {
             ",
             nome
         ))
-        .fetch_one(&self.0)
+        .fetch_optional(&self.0)
         .await
         {
-            Ok(caixa) => Some(caixa),
+            Ok(caixa) => caixa,
             Err(e) => {
                 eprintln!("Erro na linha {}: {}", line!(), e);
                 None
@@ -206,10 +210,10 @@ impl BancoDeDados {
             ",
             nome
         ))
-        .fetch_one(&self.0)
+        .fetch_optional(&self.0)
         .await
         {
-            Ok(empresa) => Some(empresa),
+            Ok(empresa) => empresa,
             Err(e) => {
                 eprintln!("line {}: {}", line!(), e);
                 None
@@ -226,10 +230,10 @@ impl BancoDeDados {
                     ",
                     nome, empresa.id
                 ))
-                .fetch_one(&self.0)
+                .fetch_optional(&self.0)
                 .await
                 {
-                    Ok(empresa) => Some(empresa),
+                    Ok(empresa) => empresa,
                     Err(e) => {
                         eprintln!("line {}: {}", line!(), e);
                         None
@@ -404,95 +408,208 @@ impl BancoDeDados {
         }
     }
 
-    pub async fn listar_gastos_filtrados(
-        &mut self,
-        filtro: &FiltroGasto
-        
-    ) -> Vec<Gasto> {
-        println!("Vou trabalhar com o filtro: {:#?}",filtro);
+    pub async fn listar_gastos_filtrados(&mut self, filtro: &FiltroGasto) -> Vec<Gasto> {
+        println!("Vou trabalhar com o filtro: {:?}", filtro);
 
+        let mut data: Vec<(Option<SqlDateTime>, Option<SqlDateTime>)> = Vec::new();
+        let mut fornecedor: Vec<Fornecedor> = Vec::new();
+        let mut caixa: Vec<CaixaDeEntrada> = Vec::new();
+        let mut pagamento: Vec<TipoDePagamento> = Vec::new();
+        let mut setor: Vec<Setor> = Vec::new();
+        let mut empresa: Vec<Empresa> = Vec::new();
+        let mut pesquisa_obs: Vec<&str> = Vec::new();
 
-        let data: &[&(SqlDateTime, SqlDateTime)] = &[];
-        let fornecedor: &[&Fornecedor] = &[];
-        let caixa: &[&CaixaDeEntrada] = &[];
-        let pagamento: &[&TipoDePagamento] = &[];
-        let setor: &[&Setor] = &[];
-        let empresa: &[&Empresa] = &[];
-        let pesquisa_obs: &[&str] = &[];
-
-        let mut query = String::from("SELECT * from Gastos");
-        let condicoes = "(".to_owned()
-            + &([
-                data.iter()
-                    .map(|(inicio, fim)| format!("(data <= '{}' AND data >= '{}')", inicio, fim))
-                    .collect::<Vec<String>>()
-                    .join(" OR "),
-                fornecedor
-                    .iter()
-                    .map(|x| format!("id_fornecedor = {}", x.id))
-                    .collect::<Vec<String>>()
-                    .join(" OR "),
-                caixa
-                    .iter()
-                    .map(|x| format!("id_caixa = {}", x.id))
-                    .collect::<Vec<String>>()
-                    .join(" OR "),
-                pagamento
-                    .iter()
-                    .map(|x| format!("idPagamento = {}", x.id))
-                    .collect::<Vec<String>>()
-                    .join(" OR "),
-                if setor.is_empty() && empresa.is_empty() {
-                    "".to_owned()
-                } else if empresa.is_empty() {
-                    setor
-                        .iter()
-                        .map(|x| format!("id_setor = {}", x.id))
-                        .collect::<Vec<String>>()
-                        .join(" OR ")
-                } else if setor.is_empty() {
-                    self.listar_setores()
-                        .await
-                        .iter()
-                        .filter(|setor| {
-                            empresa.iter().any(|empresa| empresa.id == setor.id_empresa)
-                        })
-                        .map(|x| format!("id_setor = {}", x.id))
-                        .collect::<Vec<String>>()
-                        .join(" OR ")
+        //data
+        for i in 0usize..std::cmp::max(filtro.data_inicial.len(), filtro.data_final.len()) {
+            let data_range: (Option<SqlDateTime>, Option<SqlDateTime>) = (
+                if let Some(str_date) = filtro.data_inicial.get(i) {
+                    match SqlDateTime::parse_from_str(&str_date, "%Y-%m-%d") {
+                        Ok(date) => Some(date),
+                        Err(_) => None,
+                    }
                 } else {
-                    setor
-                        .iter()
-                        .filter(|s| empresa.iter().any(|empresa| empresa.id == s.id_empresa))
-                        .map(|x| format!("id_setor = {}", x.id))
-                        .collect::<Vec<String>>()
-                        .join(" OR ")
+                    None
                 },
-            ]
-            .into_iter()
-            .filter(|x| !x.is_empty())
-            .collect::<Vec<String>>()
-            .join(") AND (")
-                + ")");
-        if !condicoes.is_empty() {
-            query += " WHERE ";
-            query += &condicoes;
+                if let Some(str_date) = filtro.data_final.get(i) {
+                    match SqlDateTime::parse_from_str(&str_date, "%Y-%m-%d") {
+                        Ok(date) => Some(date),
+                        Err(_) => None,
+                    }
+                } else {
+                    None
+                },
+            );
+            data.push(data_range);
         }
 
-        match sqlx::query_as::<_, Gasto>(&query).fetch_all(&self.0).await {
-            Ok(v) => v
-                .into_iter()
-                .filter(|gasto| {
-                    pesquisa_obs
-                        .iter()
-                        .any(|pesquisado| gasto.obs.contains(pesquisado))
+        //fornecedor
+        for nome in &filtro.fornecedor {
+            if let Some(valor) = self.obter_fornecedor(nome).await {
+                fornecedor.push(valor);
+            }
+        }
+
+        //caixa
+        for nome in &filtro.caixa {
+            if let Some(valor) = self.obter_caixa(nome).await {
+                caixa.push(valor);
+            }
+        }
+
+        //pagamento
+        for nome in &filtro.tipo_pagamento {
+            if let Some(valor) = self.obter_tipo_pagamento(nome).await {
+                pagamento.push(valor);
+            }
+        }
+
+        //empresa
+        for nome in &filtro.fornecedor {
+            if let Some(valor) = self.obter_fornecedor(nome).await {
+                fornecedor.push(valor);
+            }
+        }
+
+        //setor
+        for i in 0..filtro.setor.len() / 2 {
+            if let Some(valor) = self
+                .obter_setor(&filtro.setor[i + 1], &filtro.setor[i])
+                .await
+            {
+                setor.push(valor);
+            }
+        }
+
+        //obs
+        for obs in &filtro.obs_pesquisa {
+            if !obs.is_empty() {
+                pesquisa_obs.push(obs);
+            }
+        }
+
+        let mut query = String::from("SELECT * from Gastos");
+        let condicoes = &([
+            data.iter()
+                .map(|(inicio, fim)| {
+                    if inicio.is_some() && fim.is_some() {
+                        format!(
+                            "(data >= '{}' AND data <= '{}')",
+                            inicio.unwrap(),
+                            fim.unwrap()
+                        )
+                    } else if inicio.is_some() {
+                        format!("(data >= '{}')", inicio.unwrap())
+                    } else if fim.is_some() {
+                        format!("(data <= '{}')", fim.unwrap())
+                    } else {
+                        "".to_owned()
+                    }
                 })
-                .collect(),
+                .collect::<Vec<String>>()
+                .join(" OR "),
+            fornecedor
+                .iter()
+                .map(|x| format!("id_fornecedor = {}", x.id))
+                .collect::<Vec<String>>()
+                .join(" OR "),
+            caixa
+                .iter()
+                .map(|x| format!("id_caixa = {}", x.id))
+                .collect::<Vec<String>>()
+                .join(" OR "),
+            pagamento
+                .iter()
+                .map(|x| format!("idPagamento = {}", x.id))
+                .collect::<Vec<String>>()
+                .join(" OR "),
+            if setor.is_empty() && empresa.is_empty() {
+                "".to_owned()
+            } else if empresa.is_empty() {
+                setor
+                    .iter()
+                    .map(|x| format!("id_setor = {}", x.id))
+                    .collect::<Vec<String>>()
+                    .join(" OR ")
+            } else if setor.is_empty() {
+                self.listar_setores()
+                    .await
+                    .iter()
+                    .filter(|setor| empresa.iter().any(|empresa| empresa.id == setor.id_empresa))
+                    .map(|x| format!("id_setor = {}", x.id))
+                    .collect::<Vec<String>>()
+                    .join(" OR ")
+            } else {
+                setor
+                    .iter()
+                    .filter(|s| empresa.iter().any(|empresa| empresa.id == s.id_empresa))
+                    .map(|x| format!("id_setor = {}", x.id))
+                    .collect::<Vec<String>>()
+                    .join(" OR ")
+            },
+        ]
+        .into_iter()
+        .filter(|x| !x.is_empty())
+        .collect::<Vec<String>>()
+        .join(") AND ("));
+        if !condicoes.is_empty() {
+            query += " WHERE (";
+            query += &condicoes;
+            query += " )";
+        }
+
+        println!("Pedindo: \n\"{}\"", query);
+
+        match sqlx::query_as::<_, Gasto>(&query).fetch_all(&self.0).await {
+            Ok(v) => {
+                if pesquisa_obs.len() > 0 {
+                    v.into_iter()
+                        .filter(|gasto| {
+                            pesquisa_obs
+                                .iter()
+                                .any(|pesquisado| gasto.obs.contains(pesquisado))
+                        })
+                        .collect()
+                } else {
+                    v
+                }
+            }
             Err(e) => {
                 eprintln!("line {}: {}", line!(), e);
                 Vec::new()
             }
         }
+    }
+
+    pub async fn listar_gastos_filtrados_descompactados(
+        &mut self,
+        filtro: &FiltroGasto,
+    ) -> Vec<serde_json::Value> {
+        let (empresas, setores, caixas, pagamentos, fornecedores) = (
+            self.listar_empresas().await,
+            self.listar_setores().await,
+            self.listar_caixas().await,
+            self.listar_tipos_pagamento().await,
+            self.listar_fornecedores().await
+        );
+
+        let lista = self.listar_gastos_filtrados(filtro).await;
+        lista
+            .iter()
+            .map(|gasto| {
+                let setor = setores.iter().find(|v| v.id == gasto.id_setor).unwrap();
+                serde_json::json!({
+                 "valor": gasto.valor,
+                 "nf": gasto.nf,
+                 "data": gasto.data,
+                "setor": setor.nome,
+                "empresa": empresas.iter().find(|v|v.id==setor.id_empresa).unwrap().nome,
+                "caixa": caixas.iter().find(|v|v.id==gasto.id_caixa).unwrap().nome,
+                "pagamento": pagamentos.iter().find(|v|v.id==gasto.id_tipo_pagamento).unwrap().nome,
+                "fornecedor": fornecedores.iter().find(|v|v.id==gasto.id_fornecedor).unwrap().nome,
+                "obs": gasto.obs,
+                })
+            })
+            .collect()
     }
 
     pub async fn registrar_ou_atualizar_fornecedor(
@@ -514,16 +631,19 @@ impl BancoDeDados {
                     || f.id_tipo_pagamento != pagamento_preferido.id
                     || f.id_caixa != caixa_preferido.id
                 {
-                    println!("Fornecedor existe! Atualizando:\n{}",&format!(
-                        "UPDATE Fornecedores SET 
+                    println!(
+                        "Fornecedor existe! Atualizando:\n{}",
+                        &format!(
+                            "UPDATE Fornecedores SET 
                                 id_setor = {},
                                 id_tipo_pagamento = {},
                                 id_caixa = {},
                                 modificado = date('now','localtime')
                             WHERE id = {};
                             ",
-                        setor_preferido.id, pagamento_preferido.id, caixa_preferido.id, f.id
-                    ));
+                            setor_preferido.id, pagamento_preferido.id, caixa_preferido.id, f.id
+                        )
+                    );
                     sqlx::query(&format!(
                         "UPDATE Fornecedores SET 
                                 id_setor = {},
@@ -579,14 +699,13 @@ impl BancoDeDados {
         println!("Registrar gasto()");
         let mut problemas = Vec::with_capacity(9);
 
-        
         if self.obter_gasto(&fornecedor, nf).await.is_some() {
             problemas.push(String::from("NF já ultilizada para esse fornecedor"));
         }
-        
+
         if problemas.len() == 0 {
             println!("sem problemas até aqui");
-                        
+
             match sqlx::query(&format!(
                 "INSERT INTO Gastos 
                     (valor, nf, data, id_setor, id_caixa, id_tipo_pagamento, id_fornecedor, obs)
@@ -623,17 +742,20 @@ impl BancoDeDados {
        formato de data incorreto
        nenhuma nf recebida"
     */
-    pub async fn registrar_gasto_de_json(&mut self, json_str: &str) -> Result<Vec<String>, Vec<String>> {
+    pub async fn registrar_gasto_de_json(
+        &mut self,
+        json_str: &str,
+    ) -> Result<Vec<String>, Vec<String>> {
         println!("Recebi json: {}", json_str);
         let mut problemas = Vec::with_capacity(9);
 
         if let Ok(json_obj) = serde_json::from_str::<serde_json::Value>(json_str) {
             let valor = match &json_obj["valor"] {
                 serde_json::Value::Number(val) => Some(val.as_u64().unwrap() as u32),
-                serde_json::Value::String(str_val)=>{
+                serde_json::Value::String(str_val) => {
                     match str_val.replace(".", "").replace(",", "").parse::<u32>() {
-                        Ok(val)=>Some(val),
-                        Err(_)=> {
+                        Ok(val) => Some(val),
+                        Err(_) => {
                             problemas.push(String::from("valor mal-formatado"));
                             None
                         }
@@ -650,7 +772,7 @@ impl BancoDeDados {
             };
 
             let caixa = match &json_obj["caixa"] {
-                serde_json::Value::String(caixa_str)=>{
+                serde_json::Value::String(caixa_str) => {
                     if let Some(v) = self.obter_caixa(caixa_str).await {
                         Some(v)
                     } else {
@@ -658,14 +780,14 @@ impl BancoDeDados {
                         None
                     }
                 }
-                serde_json::Value::Null=>{
+                serde_json::Value::Null => {
                     println!("é null");
                     problemas.push(String::from("nenhum caixa recebido"));
-                    None    
+                    None
                 }
-                _=>{
+                _ => {
                     problemas.push(String::from("caixa mal-formatado"));
-                    None    
+                    None
                 }
             };
 
@@ -706,9 +828,7 @@ impl BancoDeDados {
 
             let data = if let serde_json::Value::String(data_str) = &json_obj["data"] {
                 match data_str.parse::<SqlDateTime>() {
-                    Ok(v) => {
-                        Some(v)
-                    }
+                    Ok(v) => Some(v),
                     Err(_) => {
                         problemas.push(String::from("formato de data incorreto"));
                         None
@@ -724,8 +844,12 @@ impl BancoDeDados {
             let fornecedor =
                 if let serde_json::Value::String(fornecedor_str) = &json_obj["fornecedor"] {
                     if setor.is_some() && tipo_pagamento.is_some() && caixa.is_some() {
-                        
-                        eh_novo_fornecedor = !self.listar_fornecedores().await.iter().find(|&x| &x.nome == fornecedor_str).is_some();
+                        eh_novo_fornecedor = !self
+                            .listar_fornecedores()
+                            .await
+                            .iter()
+                            .find(|&x| &x.nome == fornecedor_str)
+                            .is_some();
 
                         match self
                             .registrar_ou_atualizar_fornecedor(
@@ -754,15 +878,13 @@ impl BancoDeDados {
 
             let nf = match &json_obj["nf"] {
                 serde_json::Value::Number(val) => Some(val.as_u64().unwrap() as u32),
-                serde_json::Value::String(str_val)=>{
-                    match str_val.parse::<u32>() {
-                        Ok(val)=>Some(val),
-                        Err(_)=> {
-                            problemas.push(String::from("nf mal-formatada"));
-                            None
-                        }
+                serde_json::Value::String(str_val) => match str_val.parse::<u32>() {
+                    Ok(val) => Some(val),
+                    Err(_) => {
+                        problemas.push(String::from("nf mal-formatada"));
+                        None
                     }
-                }
+                },
                 serde_json::Value::Null => {
                     problemas.push(String::from("nenhuma nf recebida"));
                     None
@@ -797,15 +919,16 @@ impl BancoDeDados {
                         &fornecedor.unwrap(),
                         obs,
                     )
-                    .await{
-                        Ok(mut vetor)=>{
-                            if eh_novo_fornecedor{
-                                vetor.push("Novo fornecedor adicionado".to_string());
-                            }
-                            return Ok(vetor);
+                    .await
+                {
+                    Ok(mut vetor) => {
+                        if eh_novo_fornecedor {
+                            vetor.push("Novo fornecedor adicionado".to_string());
                         }
-                        Err(e) => Err(e)
+                        return Ok(vetor);
                     }
+                    Err(e) => Err(e),
+                };
             }
         }
         Err(problemas)

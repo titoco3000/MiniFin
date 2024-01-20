@@ -7,4 +7,5 @@ pub struct FiltroGasto {
     pub caixa: Vec<String>,
     pub tipo_pagamento: Vec<String>,
     pub fornecedor: Vec<String>,
+    pub obs_pesquisa: Vec<String>
 }
