@@ -464,9 +464,9 @@ impl BancoDeDados {
         }
 
         //empresa
-        for nome in &filtro.fornecedor {
-            if let Some(valor) = self.obter_fornecedor(nome).await {
-                fornecedor.push(valor);
+        for nome in &filtro.empresa {
+            if let Some(valor) = self.obter_empresa(nome).await {
+                empresa.push(valor);
             }
         }
 
@@ -479,6 +479,7 @@ impl BancoDeDados {
                 setor.push(valor);
             }
         }
+
 
         //obs
         for obs in &filtro.obs_pesquisa {
@@ -589,7 +590,7 @@ impl BancoDeDados {
             self.listar_setores().await,
             self.listar_caixas().await,
             self.listar_tipos_pagamento().await,
-            self.listar_fornecedores().await
+            self.listar_fornecedores().await,
         );
 
         let lista = self.listar_gastos_filtrados(filtro).await;
@@ -598,9 +599,9 @@ impl BancoDeDados {
             .map(|gasto| {
                 let setor = setores.iter().find(|v| v.id == gasto.id_setor).unwrap();
                 serde_json::json!({
-                 "valor": gasto.valor,
-                 "nf": gasto.nf,
-                 "data": gasto.data,
+                "valor": gasto.valor,
+                "nf": gasto.nf,
+                "data": gasto.data,
                 "setor": setor.nome,
                 "empresa": empresas.iter().find(|v|v.id==setor.id_empresa).unwrap().nome,
                 "caixa": caixas.iter().find(|v|v.id==gasto.id_caixa).unwrap().nome,
