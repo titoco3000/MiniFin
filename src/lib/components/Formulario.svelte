@@ -190,7 +190,6 @@
 	}
 	div > div {
 		padding: 0px;
-		/* border: 1px dashed black; */
 		box-sizing: border-box;
 		width: 100%;
 		height: 40px;

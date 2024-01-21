@@ -302,8 +302,8 @@
 				<input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.caixa} />
 			</div>
 		</div>
-		<button on:click={reset}>Remover Filtros</button>
-		<button on:click={carregarGastosComNovoFiltro}>Buscar</button>
+		<button type="button" on:click={reset}>Remover Filtros</button>
+		<button type="button" on:click={carregarGastosComNovoFiltro}>Buscar</button>
 	</div>
 	<div class="table-holder">
 		<table>
@@ -352,44 +352,81 @@
 		height: 100%;
 	}
 	.filtro {
-		width: 150px;
+		width: 250px;
 		background-color: white;
+		border: 2px solid black;
+		background-color: var(--cor-tema-fraca);
+		display: block;
+		resize: both;
+	}
+	.filtro h2{
+		background-color: var(--cor-tema-forte);
+		margin: 0;
 		padding: 5px;
+		font-weight: 100;
+		font-size: 22px;
 	}
 	.filtro h3 {
 		margin: 0;
 		flex-grow: 1;
 		width: 100%;
+		font-weight: 600;
 	}
 	.filtro > div {
 		display: flex;
 		flex-direction: column;
-		display: inline;
+		border-bottom: 4px solid white;
+		width: 100%;
+		padding: 10px;
 	}
 	.controls-holder {
 		display: flex;
 		justify-content: space-between;
+		width: 100%;
 	}
 	.input-holder {
 		flex-grow: 1;
 		flex-shrink: 1;
-		max-width: calc(100% - 26px);
-		display: flex;
+		background-color: aquamarine;
 		position: relative;
+		padding: 0px;
+		width: 100%;
+		height: 40px;
+		margin: 0;
+		min-width: 0;
 		--blur-amount: 1px;
 		--opacity: 0.5;
 		--pointer-events: all;
+	}
+	input[type="checkbox"]{
+		margin-left: 10px;
 	}
 	.input-holder::after {
 		content: '';
 		position: absolute;
 		left: 0;
-		right: 0;
+		top: 0;
 		width: 100%;
 		height: 100%;
-		backdrop-filter: blur(var(--blur-amount));
-		background-color: rgba(255, 255, 255, var(--opacity));
 		pointer-events: var(--pointer-events);
+		border-radius: var(--tema-border-radius);
+		/* slightly transparent fallback */
+		background-color: rgba(255, 255, 255, .9);
+	}
+	
+	/* if backdrop support: very transparent and blurred */
+	@supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+		.input-holder::after {
+			background-color: rgba(255, 255, 255, var(--opacity));
+			backdrop-filter: blur(var(--blur-amount));
+			-webkit-backdrop-filter: blur(var(--blur-amount));
+		}
+	}
+
+	.filtro button{
+		background-color: var(--cor-tema-forte);
+		border-radius: var(--tema-border-radius);
+		border: none;
 	}
 
 	.table-holder {
@@ -414,6 +451,7 @@
 		rotate: 180deg;
 	}
 	th {
+		background-color: var(--cor-tema-fraca);
 		padding: 0;
 	}
 
@@ -427,7 +465,6 @@
 	}
 	th,
 	td {
-		background-color: white;
 		white-space: nowrap;
 		overflow: hidden;
 	}
@@ -444,8 +481,10 @@
 		border-top: 2px solid;
 		border-bottom: 2px solid;
 		border-right: 2px solid;
+		background-color: var(--cor-tema-fraca);
 	}
 	td {
+		background-color: white;
 		border-bottom: 1px solid;
 		border-right: 1px solid;
 		padding: 0.25rem;

@@ -181,6 +181,7 @@
 		flex-grow: 1;
 		min-width: 0;
 		outline: none;
+		box-sizing: border-box;
 	}
 	ul {
 		position: absolute;

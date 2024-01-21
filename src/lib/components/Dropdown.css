@@ -28,7 +28,6 @@
 	background-color: white;
 	overflow: hidden;
 	border: 1px solid black;
-	box-sizing: content-box;
 	transition: height var(--tr-time), width var(--tr-time), border-color var(--tr-time);
 }
 
@@ -50,6 +49,7 @@
 	border-top: 0;
 	width: 200px;
 	border-color: transparent;
+	box-sizing: content-box;
 }
 
 :global(.dropdown-main:focus-within ul button) {

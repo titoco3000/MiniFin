@@ -101,7 +101,7 @@
 		display: none;
 		flex: 1;
 		overflow: auto;
-		padding: 0px;
+		padding: 20px;
 	}
 	.temp{
 		width: 600px;
