@@ -49,12 +49,14 @@
 	border-top: 0;
 	width: 200px;
 	border-color: transparent;
+	border-bottom-width: 0;
 	box-sizing: content-box;
 }
 
 :global(.dropdown-main:focus-within ul button) {
 	height: 30px;
 	border-color: black;
+	border-bottom-width: 1px;
 }
 
 /* Todas as listas exceto a primeira*/

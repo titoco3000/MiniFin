@@ -352,12 +352,11 @@
 		height: 100%;
 	}
 	.filtro {
-		width: 250px;
-		background-color: white;
+		flex: 1 0 250px;
 		border: 2px solid black;
 		background-color: var(--cor-tema-fraca);
-		display: block;
-		resize: both;
+		
+		overflow-y: scroll;
 	}
 	.filtro h2{
 		background-color: var(--cor-tema-forte);
@@ -370,7 +369,8 @@
 		margin: 0;
 		flex-grow: 1;
 		width: 100%;
-		font-weight: 600;
+		font-weight: 500;
+		
 	}
 	.filtro > div {
 		display: flex;
@@ -387,7 +387,6 @@
 	.input-holder {
 		flex-grow: 1;
 		flex-shrink: 1;
-		background-color: aquamarine;
 		position: relative;
 		padding: 0px;
 		width: 100%;
