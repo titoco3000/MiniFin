@@ -1,9 +1,9 @@
 use futures::executor;
 
 use serde::Serialize;
-use serde::Deserialize;
-use csv::ReaderBuilder;
 
+use crate::tipos::*;
+use crate::SqlDateTime;
 use sqlx::migrate::MigrateDatabase;
 use sqlx::Pool;
 use sqlx::Sqlite;
@@ -11,8 +11,6 @@ use std::error::Error;
 use std::fs;
 use std::io;
 use std::path::PathBuf;
-use crate::tipos::*;
-use crate::SqlDateTime;
 
 //nao deve ser pub
 pub fn obter_local_padrao() -> io::Result<PathBuf> {
@@ -33,6 +31,11 @@ pub struct Config {
 }
 
 impl Config {
+    pub fn new(local_banco_de_dados: PathBuf) -> Config{
+        Config{
+            local_banco_de_dados:local_banco_de_dados
+        }
+    }
     pub fn ler() -> io::Result<Config> {
         let local = obter_local_padrao()?;
         let string_toml = fs::read_to_string(local)?;
@@ -131,7 +134,7 @@ pub async fn criar_database(
         .salvar()?;
         Ok(())
     } else {
-        simple_error::bail!("Já tem database lá");
+        simple_error::bail!("Já tem database em {}",&db_url);
     }
 }
 
@@ -1061,101 +1064,138 @@ impl BancoDeDados {
 
     pub async fn importar_csv_aldeia(
         &mut self,
-        fornecedores: &str,
-        gastos: &str,
+        fornecedores_path: &PathBuf,
+        gastos_path: &PathBuf,
     ) -> Result<(), String> {
-        
+
+        println!("Importando CSVs");
+        let fornecedores = std::fs::read_to_string(fornecedores_path).unwrap();
+        let gastos = std::fs::read_to_string(gastos_path).unwrap();
+
+
         let mut caixas: Vec<&str> = Vec::with_capacity(20);
         let mut empresas: Vec<&str> = Vec::with_capacity(20);
         let mut setores: Vec<(&str, &str)> = Vec::with_capacity(20);
         let mut pagamentos: Vec<&str> = Vec::with_capacity(20);
 
-        for linha in fornecedores.split('\n'){
-            let record:Vec<&str> = linha.split(',').collect();
+        for linha in fornecedores.split('\n') {
+            let record: Vec<&str> = linha.split(',').collect();
+            if record.len() == 4 {
+                let empresa_setor: Vec<&str> = record[1].split('_').collect();
 
-            let empresa_setor:Vec<&str> = record[1].split('_').collect();
-
-            if !empresas.iter().find(|&x| x == &empresa_setor[0]).is_some(){
-                empresas.push(empresa_setor[0]);
-            }
-            if !setores.iter().find(|&x| x.0 == empresa_setor[0] && x.1 == empresa_setor[1]).is_some(){
-                setores.push((empresa_setor[0],empresa_setor[1]));
-            }
-            if !caixas.iter().find(|&x| x == &record[3]).is_some(){
-                caixas.push(record[3]);
-            }
-            if !pagamentos.iter().find(|&x| x == &record[2]).is_some(){
-                pagamentos.push(record[2]);
-            }
-        }
-
-        for linha in gastos.split('\n'){
-            let record:Vec<&str> = linha.split(',').collect();
-
-            let empresa_setor:Vec<&str> = record[1].split('_').collect();
-
-            if !empresas.iter().find(|&x| x == &empresa_setor[0]).is_some(){
-                empresas.push(empresa_setor[0]);
-            }
-            if !setores.iter().find(|&x| x.0 == empresa_setor[0] && x.1 == empresa_setor[1]).is_some(){
-                setores.push((empresa_setor[0],empresa_setor[1]));
-            }
-            if !caixas.iter().find(|&x| x == &record[5]).is_some(){
-                caixas.push(record[5]);
-            }
-            if !pagamentos.iter().find(|&x| x == &record[3]).is_some(){
-                pagamentos.push(record[3]);
-            }    
-        }
-
-        self.registrar_basicos(&caixas, &empresas, &setores, &pagamentos).await;
-
-        for linha in fornecedores.split('\n'){
-            let record:Vec<&str> = linha.split(',').collect();
-
-            let empresa_setor:Vec<&str> = record[1].split('_').collect();
-
-            let mut sucesso = false;
-            
-            if let Some(setor) = self.obter_setor(empresa_setor[1], empresa_setor[0]).await{
-                if let Some(pagamento) = self.obter_tipo_pagamento(record[2]).await{
-                    if let Some(caixa) = self.obter_caixa(record[3]).await{
-                        self.registrar_ou_atualizar_fornecedor(record[0], &setor, &pagamento, &caixa).await?;
-                        sucesso = true;
-                    }
+                if !empresas.iter().find(|&x| x == &empresa_setor[0]).is_some() {
+                    empresas.push(empresa_setor[0]);
                 }
+                if !setores
+                    .iter()
+                    .find(|&x| x.0 == empresa_setor[1] && x.1 == empresa_setor[0])
+                    .is_some()
+                {
+                    setores.push((empresa_setor[1], empresa_setor[0]));
+                }
+                if !caixas.iter().find(|&x| x == &record[3]).is_some() {
+                    caixas.push(record[3]);
+                }
+                if !pagamentos.iter().find(|&x| x == &record[2]).is_some() {
+                    pagamentos.push(record[2]);
+                }
+            } else {
+                println!("Não fez a linha: \"{}\"", linha);
             }
-            if !sucesso{
-                return Err(format!("Erro com fornecedor: {:?}",record));
-            }
-
         }
-        for linha in gastos.split('\n'){
-            let record:Vec<&str> = linha.split(',').collect();
 
-            let empresa_setor:Vec<&str> = record[1].split('_').collect();
+        for linha in gastos.split('\n') {
+            let record: Vec<&str> = linha.split(',').collect();
             
-            let mut sucesso = false;
-            //uma linda piramide, mas poderia usar uma tupla
-            if let Ok(valor) = record[3].parse::<u32>(){
-                if let Ok(nf) = record[5].parse::<u32>(){
-                    if let Ok(data) = SqlDateTime::parse_from_str(record[2], "%d/%m/%Y") {
-                        if let Some(setor) = self.obter_setor(empresa_setor[1], empresa_setor[0]).await{
-                            if let Some(caixa) = self.obter_caixa(record[6]).await{
-                                if let Some(pagamento) = self.obter_tipo_pagamento(record[4]).await{
-                                    if let Some(fornecedor) = self.obter_fornecedor(record[0]).await{
-                                        if let Ok(_) = self.registrar_gasto(valor, nf, data, &setor, &caixa, &pagamento, &fornecedor, record[7].to_owned()).await{
-                                            sucesso = true;
-                                        }
-                                    }
-                                }
-                            }
+            if record.len() == 8 {
+                let empresa_setor: Vec<&str> = record[1].split('_').collect();
+                if !empresas.iter().find(|&x| x == &empresa_setor[0]).is_some() {
+                    empresas.push(empresa_setor[0]);
+                }
+                if !setores
+                    .iter()
+                    .find(|&x| x.0 == empresa_setor[1] && x.1 == empresa_setor[0])
+                    .is_some()
+                {
+                    setores.push((empresa_setor[1], empresa_setor[0]));
+                }
+                if !caixas.iter().find(|&x| x == &record[6]).is_some() {
+                    caixas.push(record[6]);
+                }
+                if !pagamentos.iter().find(|&x| x == &record[4]).is_some() {
+                    pagamentos.push(record[4]);
+                }
+            } else {
+                println!("Não fez a linha: \"{}\"", linha);
+            }
+        }
+
+        println!("Registrando: {:#?}",(&caixas, &empresas, &setores, &pagamentos));
+
+        self.registrar_basicos(&caixas, &empresas, &setores, &pagamentos)
+            .await;
+
+        for linha in fornecedores.split('\n') {
+            let record: Vec<&str> = linha.split(',').collect();
+
+            if record.len() == 4 {
+                let empresa_setor: Vec<&str> = record[1].split('_').collect();
+
+                let mut sucesso = false;
+
+                if let Some(setor) = self.obter_setor(empresa_setor[1], empresa_setor[0]).await {
+                    if let Some(pagamento) = self.obter_tipo_pagamento(record[2]).await {
+                        if let Some(caixa) = self.obter_caixa(record[3]).await {
+                            self.registrar_ou_atualizar_fornecedor(
+                                record[0], &setor, &pagamento, &caixa,
+                            )
+                            .await?;
+                            sucesso = true;
                         }
                     }
                 }
+                if !sucesso {
+                    return Err(format!("Erro com fornecedor: {:?}", record));
+                }
+            } else {
+                println!("Não fez a linha: \"{}\"", linha);
             }
-            if !sucesso{
-                return Err(format!("Erro com gasto: {:?}",record));
+        }
+        for linha in gastos.split('\n') {
+            let record: Vec<&str> = linha.split(',').collect();
+            if record.len() == 8 {
+                let empresa_setor: Vec<&str> = record[1].split('_').collect();
+
+                let valor = record[3].parse::<f64>().expect(&format!("Erro no valor {}",record[3]));
+                let nf = record[5].parse::<u32>().expect(&format!("Erro na nf {}",record[5]));
+                let data = SqlDateTime::parse_from_str(record[2], "%d/%m/%Y").expect(&format!("Erro na data {}",record[2]));
+                let setor = self.obter_setor(empresa_setor[1], empresa_setor[0]).await.expect(&format!("Erro no setor {:?}",(empresa_setor[1], empresa_setor[0])));
+                let caixa = self.obter_caixa(record[6]).await.expect(&format!("Erro n caixa {}",record[6]));
+                let pagamento = self.obter_tipo_pagamento(record[4]).await.expect(&format!("Erro no pagamento {}",record[4]));
+                let fornecedor = match self.obter_fornecedor(record[0]).await{
+                    Some(f)=>f,
+                    None=>{
+                        self.registrar_ou_atualizar_fornecedor(record[0], &setor, &pagamento, &caixa).await
+                        .expect(&format!("Erro ao registrar fornecedor desconhecido: {}",record[0]))
+                    }
+                };
+                
+
+                self
+                    .registrar_gasto(
+                        (valor*100.0) as u32,
+                        nf,
+                        data,
+                        &setor,
+                        &caixa,
+                        &pagamento,
+                        &fornecedor,
+                        record[7].to_owned(),
+                    )
+                    .await.expect("Erro ao registrar gasto");
+
+            } else {
+                println!("Não fez a linha: \"{}\"", linha);
             }
         }
 
@@ -1199,7 +1239,7 @@ impl BancoDeDados {
             let id_empresa = self
                 .obter_empresa(empresa)
                 .await
-                .expect("Tentando adicionar setor a empresa inexistente")
+                .expect(&format!("Tentando adicionar setor a empresa inexistente ({})",empresa))
                 .id;
             sqlx::query(&format!(
                 "INSERT INTO Setores 

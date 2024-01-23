@@ -155,3 +155,12 @@ export async function enviarNovoGasto(gasto:Gasto) {
 	let v:string = await invoke('registrar_gasto',{jsonData: JSON.stringify(gasto)});
 	return JSON.parse(v);
 }
+
+export async function importarCSVs(fornecedores:string, gastos:string) {
+	let v:string = await invoke('importar_csv_aldeia',{fornecedores: fornecedores, gastos:gastos});
+	return JSON.parse(v);
+}
+
+export async function definirLocalDB(local:string) {
+	return await invoke('definir_local_bd',{local:local});
+}
