@@ -1,3 +1,4 @@
+use chrono::Datelike;
 use futures::executor;
 
 use serde::Serialize;
@@ -1173,7 +1174,11 @@ impl BancoDeDados {
 
                 let valor = record[3].parse::<f64>().expect(&format!("Erro no valor {}",record[3]));
                 let nf = record[5].parse::<u32>().expect(&format!("Erro na nf {}",record[5]));
-                let data = SqlDateTime::parse_from_str(record[2], "%d/%m/%Y").expect(&format!("Erro na data {}",record[2]));
+                let mut data = SqlDateTime::parse_from_str(record[2], "%d/%m/%Y").expect(&format!("Erro na data {}",record[2]));
+                //datas no CSV podem estar com só dois digitos pro ano
+                if data.year()<2000{
+                    data = data.with_year(data.year()+2000).expect("Erro ao modificar data");
+                }
                 let setor = self.obter_setor(empresa_setor[1], empresa_setor[0]).await.expect(&format!("Erro no setor {:?}",(empresa_setor[1], empresa_setor[0])));
                 let caixa = self.obter_caixa(record[6]).await.expect(&format!("Erro n caixa {}",record[6]));
                 let pagamento = self.obter_tipo_pagamento(record[4]).await.expect(&format!("Erro no pagamento {}",record[4]));
