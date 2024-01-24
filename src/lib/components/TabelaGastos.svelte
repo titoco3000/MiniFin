@@ -178,7 +178,7 @@
 					<input
 						type="date"
 						on:input={algoModificado}
-						bind:value={valoresReais.data_inicial}
+						bind:value={valoresReais.data_inicial[0]}
 						bind:this={dataInicialEl}
 					/>
 				</div>
@@ -196,7 +196,7 @@
 					<input
 						type="date"
 						on:input={algoModificado}
-						bind:value={valoresReais.data_final}
+						bind:value={valoresReais.data_final[0]}
 						bind:this={dataFinalEl}
 					/>
 				</div>
