@@ -3,11 +3,12 @@
     
     export let value = new Date().toISOString().split('T')[0];
     export let onChange = ()=>{};
+    export let placeholder = new Date().toISOString().split('T')[0];
     
-    let valueVisivel = '';
+    let valueVisivel = value;
 
     export function reset(){
-        value = new Date().toISOString().split('T')[0];
+        value = placeholder;
         atualizarVisivel()
     }
 
@@ -19,7 +20,9 @@
         valueVisivel = formatar(value);
     }
 
-    onMount(()=>{atualizarVisivel()});
+    onMount(()=>{
+        atualizarVisivel();
+    });
 </script>
 <main>
     <input type="date" name="data" bind:value={value} on:change={()=>{
@@ -43,7 +46,7 @@
         font-size: 16px;
         display: flex;
         justify-content: space-around;
-        align-self: center;
+        align-items: center;
         height: 100%;
         width: 100%;
         position: absolute;

@@ -4,6 +4,7 @@
 	import InputCaixa from '$lib/components/InputCaixa.svelte';
 	import InputEmpresa from './InputEmpresa.svelte';
 	import InputTipoPagamento from './InputTipoPagamento.svelte';
+	import InputData from './InputData.svelte';
 	import { listarGastos, type Gasto, FiltroGastos as Filtro } from '$lib/armazenamento';
 	import { onMount } from 'svelte';
 	import { obterDigitosNF } from '$lib/utils';
@@ -39,8 +40,8 @@
 	let empresaToggleEl: HTMLInputElement;
 	let tableHeaderEl: HTMLElement;
 
-	let dataInicialEl: HTMLInputElement;
-	let dataFinalEl: HTMLInputElement;
+	let dataInicialEl: InputData;
+	let dataFinalEl: InputData;
 	let fornecedorEl: { reset: Function };
 	let empresaEl: { reset: Function };
 	let setorEl: { reset: Function };
@@ -54,6 +55,8 @@
 
 	let somatorioValor = 0;
 	let digitosNF = 9;
+
+	let promessaGastos:Promise<any>;
 
 	function selecionarFiltro(e: any) {
 		algoModificado();
@@ -91,8 +94,8 @@
 	function reset() {
 		console.log('resetting');
 		
-		valoresReais.data_inicial[0] = new Date().toISOString().split('T')[0];
-		valoresReais.data_final[0] = new Date().toISOString().split('T')[0];
+		dataInicialEl.reset();
+		dataFinalEl.reset();
 		fornecedorEl.reset();
 		empresaEl.reset();
 		setorEl.reset();
@@ -118,7 +121,8 @@
 	function carregarGastos() {
 		console.log(filtroAplicado);
 		
-		listarGastos(filtroAplicado, sortParameter).then((gastos) => {
+		promessaGastos = listarGastos(filtroAplicado, sortParameter)
+		promessaGastos.then((gastos) => {
 			gastosFiltrados = gastos;
 			somatorioValor = gastosFiltrados.reduce((a, b) => {
 				return a + b.valor;
@@ -162,6 +166,11 @@
 		while(s.length<digitosNF) s = '0'+s;
 		return s;
 	}
+
+	//data de 6 meses atras
+	let dataInicial = new Date();
+	dataInicial.setMonth( dataInicial.getMonth() - 6 );
+
 	onMount(() => {
 		digitosNF = obterDigitosNF();
 		reset();
@@ -175,12 +184,12 @@
 			<h3>Data inicial</h3>
 			<div class="controls-holder">
 				<div class="input-holder">
-					<input
-						type="date"
-						on:input={algoModificado}
+					<InputData 
+						onChange={algoModificado}
 						bind:value={valoresReais.data_inicial[0]}
 						bind:this={dataInicialEl}
-					/>
+						placeholder={dataInicial.toISOString().split('T')[0]}
+						/>
 				</div>
 				<input
 					type="checkbox"
@@ -193,12 +202,10 @@
 			<h3>Data final</h3>
 			<div class="controls-holder">
 				<div class="input-holder">
-					<input
-						type="date"
-						on:input={algoModificado}
+					<InputData 
+						onChange={algoModificado}
 						bind:value={valoresReais.data_final[0]}
-						bind:this={dataFinalEl}
-					/>
+						bind:this={dataFinalEl} />
 				</div>
 				<input
 					type="checkbox"
@@ -306,6 +313,14 @@
 		<button type="button" on:click={carregarGastosComNovoFiltro}>Buscar</button>
 	</div>
 	<div class="table-holder">
+		{#await gastosFiltrados}
+		<h1>Carregando</h1>
+		{:then promessaGastos}
+		<!-- Decide to send to registration or not -->
+		<!-- you can either use the recievedData or just omit it -->
+		{:catch}
+		<!-- Handle error -->
+		{/await}
 		<table>
 			<tr bind:this={tableHeaderEl}>
 				{#each titulos as titulo}

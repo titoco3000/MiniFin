@@ -5,13 +5,14 @@
 	import InputSetor from '$lib/components/InputSetor.svelte';
 	import InputCaixa from '$lib/components/InputCaixa.svelte';
 	import InputTipoPagamento from '$lib/components/InputTipoPagamento.svelte';
+	import InputData from './InputData.svelte';
 	import ResultBox from '$lib/components/ResultBox.svelte';
 	import { enviarNovoGasto, type Gasto } from '$lib/armazenamento';
 	let resultBoxEl: ResultBox;
 
 	let inputFornecedor: InputFornecedor;
 	let inputNF: InputNF;
-	let inputData: HTMLInputElement;
+	let inputData: InputData;
 	let inputValor: InputValor;
 	let inputSetor: InputSetor;
 	let inputCaixa: InputCaixa;
@@ -47,7 +48,7 @@
 				resultBoxEl.mensagem(r, 'bom');
 				
 				inputValor.reset();
-				inputData.value = new Date().toISOString().split('T')[0];
+				inputData.reset();
 				inputNF.reset();
 				inputObs.value = '';
 				
@@ -81,7 +82,7 @@
 				<!-- svelte-ignore a11y-label-has-associated-control -->
 				<label>Data</label> 
 				<div>
-					<input type="date" bind:this={inputData} value={new Date().toISOString().split('T')[0]} />
+					<InputData bind:this = {inputData}/>
 				</div>
 			</div>
 			<div class="small">

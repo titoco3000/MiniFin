@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ImportadorCSV from "./ImportadorCSV.svelte";
+	import InputData from "./InputData.svelte";
 
     let contentHolder:HTMLElement;
     let buttonsHolder:HTMLElement;
@@ -20,13 +20,13 @@
 
 <main>
     <nav bind:this={buttonsHolder}>
-        <button on:click={()=>revelarFerramenta(0)}>Importar CSV</button>
+        <button on:click={()=>revelarFerramenta(0)}>Teste</button>
         <button on:click={()=>revelarFerramenta(1)}>Editar gasto</button>
         <button on:click={()=>revelarFerramenta(2)}>Editar fornecedor</button>
     </nav>
     <div class="content" bind:this={contentHolder}>
         <div>
-            <ImportadorCSV />
+            <InputData />
         </div>
         <div></div>
         <div></div>
