@@ -15,6 +15,27 @@
 		(modosHolderEl.children[index] as HTMLElement).style.display = 'block';
 	}
 
+	function enviarFormCSVs() {
+		definirLocalDB(pastaDB).then((r:any) => {
+			console.log("r:",r);
+			console.log(r.Ok===undefined,r.Err===undefined);
+			
+			if (r.Ok !==undefined) {
+				importarCSVs(csvPaths[0], csvPaths[1]).then((r) => {
+					if (r.Ok !==undefined) {
+						window.location.replace("main");
+					} else {
+						console.log('Algo de errado ocorreu: ', r);
+						alert('Algo de errado ocorreu ao enviar CSVs');
+					}
+				});
+			} else {
+				console.log('Algo de errado ocorreu: ', r);
+				alert('Algo de errado ocorreu ao enviar local do bd');
+			}
+		});
+	}
+
 	onMount(() => {});
 </script>
 
@@ -41,19 +62,7 @@
 			<FileChooser pastas={true} bind:value={pastaDB} />
 		</form>
 		<form id="localizar"></form>
-		<form
-			id="CSVs"
-			on:submit={() => {
-				definirLocalDB(pastaDB).then((r) => {
-					if (r == 'Ok') {
-						importarCSVs(csvPaths[0], csvPaths[1]);
-					}
-					else{
-						alert("Algo de errado ocorreu");
-					}
-				});
-			}}
-		>
+		<form id="CSVs" on:submit={enviarFormCSVs}>
 			<!-- svelte-ignore a11y-label-has-associated-control -->
 			<label>
 				<p>Primeiro, escolha onde deverão ser salvos os dados:</p>
@@ -82,7 +91,7 @@
 		display: flex;
 		flex-direction: column;
 		width: 100%;
-		height: 100%;
+		height: 100vh;
 	}
 	h1 {
 		font-size: 100px;

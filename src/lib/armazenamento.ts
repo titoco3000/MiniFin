@@ -162,5 +162,6 @@ export async function importarCSVs(fornecedores:string, gastos:string) {
 }
 
 export async function definirLocalDB(local:string) {
-	return await invoke('definir_local_bd',{local:local});
+	let v:string = await invoke('definir_local_bd',{local:local});
+	return JSON.parse(v);
 }

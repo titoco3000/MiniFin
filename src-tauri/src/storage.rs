@@ -68,7 +68,12 @@ pub async fn criar_database(
         .await
         .unwrap_or(false)
     {
-        sqlx::Sqlite::create_database(&db_url).await.unwrap();
+        //garante que a pasta /raja/ exista
+        let mut folder = local_banco_de_dados.clone();
+        folder.pop();
+        std::fs::create_dir_all(folder)?;
+
+        sqlx::Sqlite::create_database(&db_url).await?;
         let pool = sqlx::SqlitePool::connect(&db_url).await?;
         let qry = "PRAGMA foreign_keys = ON ;
         CREATE TABLE IF NOT EXISTS TiposDePagamento (

@@ -10,93 +10,93 @@ use storage::BancoDeDados;
 
 pub type SqlDateTime = sqlx::types::chrono::NaiveDate;
 
-static mut EH_INSTALACAO: bool = false;
-
 // Tauri commands
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
 #[tauri::command]
-fn listar_caixas(database: tauri::State<'_, Mutex<BancoDeDados>>) -> String {
+fn listar_caixas(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().listar_caixas(),
+        database.lock().unwrap().as_mut().unwrap().listar_caixas(),
     ))
     .unwrap()
 }
 
 #[tauri::command]
-fn listar_tipos_pagamento(database: tauri::State<'_, Mutex<BancoDeDados>>) -> String {
+fn listar_tipos_pagamento(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().listar_tipos_pagamento(),
+        database.lock().unwrap().as_mut().unwrap().listar_tipos_pagamento(),
     ))
     .unwrap()
 }
 
 #[tauri::command]
-fn listar_setores(database: tauri::State<'_, Mutex<BancoDeDados>>) -> String {
+fn listar_setores(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().listar_setores(),
+        database.lock().unwrap().as_mut().unwrap().listar_setores(),
     ))
     .unwrap()
 }
 
 #[tauri::command]
-fn listar_empresas(database: tauri::State<'_, Mutex<BancoDeDados>>) -> String {
+fn listar_empresas(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().listar_empresas(),
+        database.lock().unwrap().as_mut().unwrap().listar_empresas(),
     ))
     .unwrap()
 }
 
 #[tauri::command]
-fn listar_fornecedores(database: tauri::State<'_, Mutex<BancoDeDados>>) -> String {
+fn listar_fornecedores(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().listar_fornecedores(),
+        database.lock().unwrap().as_mut().unwrap().listar_fornecedores(),
     ))
     .unwrap()
 }
 
 #[tauri::command]
-fn validar_gasto(database: tauri::State<'_, Mutex<BancoDeDados>>, json_data: &str) -> String {
+fn validar_gasto(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, json_data: &str) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().validar_gasto_de_json(json_data),
+        database.lock().unwrap().as_mut().unwrap().validar_gasto_de_json(json_data),
     ))
     .unwrap()
 }
 
 #[tauri::command]
-fn registrar_gasto(database: tauri::State<'_, Mutex<BancoDeDados>>, json_data: &str) -> String {
+fn registrar_gasto(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, json_data: &str) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().registrar_gasto_de_json(json_data),
+        database.lock().unwrap().as_mut().unwrap().registrar_gasto_de_json(json_data),
     ))
     .unwrap()
 }
 
 #[tauri::command]
 fn listar_gastos(
-    database: tauri::State<'_, Mutex<BancoDeDados>>,
+    database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
     filtro: tipos::FiltroGasto,
 ) -> String {
     serde_json::to_string(&executor::block_on(
         database
             .lock()
-            .unwrap()
+            .unwrap().as_mut().unwrap()
             .listar_gastos_filtrados_descompactados(&filtro),
     ))
     .unwrap()
 }
 
 #[tauri::command]
-async fn importar_csv_aldeia(fornecedores: String, gastos: String) {
-    storage::BancoDeDados::abrir()
-        .await
-        .unwrap()
-        .importar_csv_aldeia(&PathBuf::from(fornecedores), &PathBuf::from(gastos))
-        .await
-        .unwrap();
+async fn importar_csv_aldeia(fornecedores: String, gastos: String) -> String {
+    serde_json::to_string(
+        &storage::BancoDeDados::abrir()
+            .await
+            .unwrap()
+            .importar_csv_aldeia(&PathBuf::from(fornecedores), &PathBuf::from(gastos))
+            .await,
+    )
+    .unwrap()
 }
 #[tauri::command]
-fn checar_tipo_de_janela() -> String {
-    if unsafe { EH_INSTALACAO } {
+fn checar_tipo_de_janela(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> String {
+    if database.lock().unwrap().is_none() {
         "instalacao".to_owned()
     } else {
         "normal".to_owned()
@@ -104,99 +104,80 @@ fn checar_tipo_de_janela() -> String {
 }
 
 #[tauri::command]
-fn definir_local_bd(local: &str) -> String {
+fn definir_local_bd(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, local: &str) -> String {
+    println!("definir_local_bd");
     let mut local = PathBuf::from(local);
     local.push("raja");
     local.push("raja.db");
-    match storage::Config::new(local.clone()).salvar() {
-        Ok(_) => match executor::block_on(storage::BancoDeDados::abrir()) {
-            Ok(_db) => {
-                println!("bd já existe");
-                "Ok"
-            }
-            Err(_) => match executor::block_on(storage::criar_database(&local)) {
-                Ok(_db) => "Ok",
-                Err(e) => {
-                    println!("Erro ao criar bd: {}",e);
-                    "Err"
+    serde_json::to_string(&match storage::Config::new(local.clone()).salvar() {
+         Ok(_) => {
+            let db:Option<BancoDeDados> = match executor::block_on(storage::BancoDeDados::abrir()) {
+                Ok(db)=>Some(db),
+                Err(_)=>{
+                    match executor::block_on(storage::criar_database(&local)) {
+                        Ok(_)=>{
+                            match executor::block_on(storage::BancoDeDados::abrir()) {
+                                Ok(bd)=>Some(bd),
+                                Err(e)=>{
+                                    println!("Erro ao abrir bd depos de criar: {}", e);
+                                    None
+                                }
+                            }
+                        },
+                        Err(e)=>{
+                            println!("Erro ao criar bd: {}", e);
+                            None
+                        }
+                    }
                 }
-            },
-        },
+            };
+
+            match db {
+                Some(db)=>{
+                    *database.lock().unwrap() = Some(db);
+                    Ok(())
+                },
+                None =>
+                    Err("Erro ao abrir bd depos de criar".to_owned())
+            }
+         }
         Err(_) => {
             println!("Erro ao salvar config");
-            "Err"
+            Err("Erro ao salvar config".to_owned())
+
         }
-    }
-    .to_owned()
+    }).expect("Erro ao jsonificar")
 }
 
 fn main() {
-    println!("{:?}", storage::obter_local_padrao());
-
-    let mut builder = tauri::Builder::default();
-
-    match storage::Config::ler() {
+    let db_mutex = Mutex::new( match storage::Config::ler() {
         Ok(_config_file) => match executor::block_on(storage::BancoDeDados::abrir()) {
             Ok(database) => {
-                let db_mutex = Mutex::new(database);
-
-                builder = builder
-                    .manage(db_mutex)
-                    .invoke_handler(tauri::generate_handler![
-                        listar_caixas,
-                        listar_tipos_pagamento,
-                        listar_setores,
-                        listar_empresas,
-                        listar_fornecedores,
-                        listar_gastos,
-                        validar_gasto,
-                        registrar_gasto,
-                        checar_tipo_de_janela
-                    ]);
+                Some(database)
             }
             Err(e) => {
                 panic!("Erro ao abrir db: {}", e);
             }
         },
         Err(_) => {
-            unsafe {
-                EH_INSTALACAO = true;
-            }
-
-            builder = builder.invoke_handler(tauri::generate_handler![
-                importar_csv_aldeia,
-                checar_tipo_de_janela,
-                definir_local_bd
-            ]);
+            None
         }
-    }
-
-    builder
+    });
+    tauri::Builder::default()
+    .manage(db_mutex)
+    .invoke_handler(tauri::generate_handler![
+        listar_caixas,
+        listar_tipos_pagamento,
+        listar_setores,
+        listar_empresas,
+        listar_fornecedores,
+        listar_gastos,
+        validar_gasto,
+        registrar_gasto,
+        importar_csv_aldeia,
+        checar_tipo_de_janela,
+        definir_local_bd
+    ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-
-    // let database = Mutex::new(match executor::block_on(storage::BancoDeDados::abrir()) {
-    //     Ok(db) => db,
-    //     Err(_) => {
-    //         executor::block_on(storage::criar_database(&PathBuf::from(
-    //             "/home/tito/Documents/raja/raja.db",
-    //         )))
-    //         .unwrap();
-    //         executor::block_on(storage::BancoDeDados::abrir()).unwrap()
-    //     }
-    // });
-
-    // if executor::block_on(database.lock().unwrap().listar_caixas()).is_empty() {
-    //     executor::block_on(database.lock().unwrap().registrar_basicos(
-    //         &["Santander", "Bradesco"],
-    //         &["Hotel", "Restaurante"],
-    //         &[
-    //             ("Manutenção", "Hotel"),
-    //             ("Manutenção", "Restaurante"),
-    //             ("Lavanderia", "Hotel"),
-    //             ("Comida", "Restaurante"),
-    //         ],
-    //         &["Cartão", "Dinheiro"],
-    //     ))
-    // }
 }
