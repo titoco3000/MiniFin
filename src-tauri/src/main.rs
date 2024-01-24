@@ -85,13 +85,11 @@ fn listar_gastos(
 
 #[tauri::command]
 async fn importar_csv_aldeia(fornecedores: String, gastos: String) -> String {
-    serde_json::to_string(
-        &storage::BancoDeDados::abrir()
-            .await
+    serde_json::to_string(&executor::block_on(
+        executor::block_on(storage::BancoDeDados::abrir())
             .unwrap()
-            .importar_csv_aldeia(&PathBuf::from(fornecedores), &PathBuf::from(gastos))
-            .await,
-    )
+            .importar_csv_aldeia(&PathBuf::from(fornecedores), &PathBuf::from(gastos)),
+    ))
     .unwrap()
 }
 #[tauri::command]
