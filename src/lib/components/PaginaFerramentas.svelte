@@ -1,5 +1,5 @@
 <script lang="ts">
-	import InputData from "./InputData.svelte";
+	import LazyTable from "./LazyTable.svelte";
 
     let contentHolder:HTMLElement;
     let buttonsHolder:HTMLElement;
@@ -26,7 +26,7 @@
     </nav>
     <div class="content" bind:this={contentHolder}>
         <div>
-            <InputData />
+            <LazyTable />
         </div>
         <div></div>
         <div></div>

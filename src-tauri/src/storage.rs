@@ -2,6 +2,7 @@ use chrono::Datelike;
 use futures::executor;
 
 use serde::Serialize;
+use sqlx::Row;
 
 use crate::tipos::*;
 use crate::SqlDateTime;
@@ -418,15 +419,17 @@ impl BancoDeDados {
             }
         }
     }
-
-    pub async fn listar_gastos_filtrados(
-        &mut self,
-        filtro: &FiltroGasto,
-        limit: Option<u32>,
-        offset: Option<u32>,
-    ) -> Vec<Gasto> {
-        println!("Vou trabalhar com o filtro: {:?}", filtro);
-
+    
+    pub async fn contar_gastos(&mut self)->u32{
+        sqlx::query(
+            "SELECT COUNT(*) FROM Gastos"
+        )
+        .fetch_one(&self.0)
+        .await.expect("Erro ao contar").get::<u32,usize>(0)
+    }
+    
+    pub async fn filtro_into_query(&mut self, filtro: &FiltroGasto)->String{
+        
         let mut data: Vec<(Option<SqlDateTime>, Option<SqlDateTime>)> = Vec::new();
         let mut fornecedor: Vec<Fornecedor> = Vec::new();
         let mut caixa: Vec<CaixaDeEntrada> = Vec::new();
@@ -503,8 +506,7 @@ impl BancoDeDados {
             }
         }
 
-        let mut query = String::from("SELECT * from Gastos");
-        let condicoes = &([
+        [
             data.iter()
                 .map(|(inicio, fim)| {
                     if inicio.is_some() && fim.is_some() {
@@ -562,11 +564,28 @@ impl BancoDeDados {
                     .collect::<Vec<String>>()
                     .join(" OR ")
             },
+            pesquisa_obs
+            .iter()
+            .map(|x| format!("obs like '%{}%'",x))
+            .collect::<Vec<String>>()
+            .join(" OR ")
         ]
         .into_iter()
         .filter(|x| !x.is_empty())
         .collect::<Vec<String>>()
-        .join(") AND ("));
+        .join(") AND (")
+    }
+    pub async fn listar_gastos_filtrados(
+        &mut self,
+        filtro: &FiltroGasto,
+        limit: Option<u32>,
+        offset: Option<u32>,
+    ) -> Vec<Gasto> {
+        println!("Vou trabalhar com o filtro: {:?}", filtro);
+
+        let mut query = String::from("SELECT * from Gastos");
+        let condicoes = &self.filtro_into_query(filtro).await;
+
         if !condicoes.is_empty() {
             query += " WHERE (";
             query += &condicoes;
@@ -582,19 +601,7 @@ impl BancoDeDados {
         println!("Pedindo: \n\"{}\"", query);
 
         match sqlx::query_as::<_, Gasto>(&query).fetch_all(&self.0).await {
-            Ok(v) => {
-                if pesquisa_obs.len() > 0 {
-                    v.into_iter()
-                        .filter(|gasto| {
-                            pesquisa_obs
-                                .iter()
-                                .any(|pesquisado| gasto.obs.contains(pesquisado))
-                        })
-                        .collect()
-                } else {
-                    v
-                }
-            }
+            Ok(v) => v,
             Err(e) => {
                 eprintln!("line {}: {}", line!(), e);
                 Vec::new()

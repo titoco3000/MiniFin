@@ -5,15 +5,15 @@
 	export let titulos = ['a', 'b', 'c', 'd', 'e'];
 	export let infoInferior = ['soma', 'nº'];
 	export let batchSize = 40;
-	export let calcularMaxRows = (): number => {
+	export let calcularMaxRows = async (): Promise<number> => {
 		return 1000;
 	};
-	export let carregarValores = (
+	export let carregarValores = async (
 		offset: number,
 		limit: number,
 		sorterIndex: number,
 		sorterReverse: boolean
-	): string[][] => {
+	): Promise<string[][]> => {
 		let a = [];
 		for (let i = offset; i < Math.min(offset + batchSize, maxRows); i++) {
 			a.push(getRowAtId(i));
@@ -21,8 +21,10 @@
 		return a;
 	};
 
-    export function reset() {
-		maxRows = calcularMaxRows();
+	export function reset() {
+		calcularMaxRows().then((v) => {
+			maxRows = v;
+		});
 		mainEl.scrollTop = 0;
 		offset = 0;
 		tbodyEl.replaceChildren();
@@ -58,11 +60,15 @@
 	}
 
 	function incluirNovosValoresNaTabela() {
-		let a = carregarValores(offset, batchSize, sorterIndex, sorterReverse);
-		a.forEach((row) => {
-			tbodyEl.appendChild(rowToElement(row));
+		carregarValores(offset, batchSize, sorterIndex, sorterReverse).then((a) => {
+			a.forEach((row) => {
+				tbodyEl.appendChild(rowToElement(row));
+			});
+			offset += a.length;
+            
+            if(firstVisibleIndex ==0)
+                firstVisibleIndex = 1;
 		});
-		offset += a.length;
 	}
 
 	function onScroll(evento: Event) {
@@ -80,10 +86,14 @@
 			//  firstVisibleIndex = Math.ceil(mainEl.scrollTop / tbodyEl.children[0].getBoundingClientRect().height);
 			//caso queira mostrar do primeiro ao ultimo
 
+			console.log(valorScroll);
+			
+
 			firstVisibleIndex = Math.max(
 				Math.min(1, tbodyEl.childElementCount),
 				Math.round(valorScroll * offset)
 			);
+			if (isNaN(firstVisibleIndex)) firstVisibleIndex = 1;
 		}
 	}
 
@@ -93,8 +103,8 @@
 			sorterReverse = !sorterReverse;
 		}
 		tableHeaderEl.querySelectorAll('img').forEach((el) => {
-			if (index != i) el.style.visibility = 'hidden';
-			else el.style.visibility = 'visible';
+			if (index != i) el.style.display = 'none';
+			else el.style.display = 'inline';
 			if (sorterReverse) el.style.transform = 'rotate(-90deg)';
 			else el.style.transform = 'rotate(90deg)';
 			i++;
@@ -148,12 +158,10 @@
 
 <style>
 	main {
-		width: 600px;
-		height: 500px;
-		margin: 20px;
+		width: 100%;
+		height: 100%;
 		overflow: auto;
 		padding: 0;
-		border: 1px dashed black;
 	}
 	table {
 		table-layout: fixed;
@@ -203,9 +211,9 @@
 		flex: 0 0 20px;
 		padding: 5px;
 		transform: rotate(90deg);
-		visibility: hidden;
+		display: none;
 	}
 	thead th:first-child button > img {
-		visibility: visible;
+		display: inline;
 	}
 </style>

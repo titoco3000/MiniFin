@@ -5,10 +5,11 @@
 	import InputEmpresa from './InputEmpresa.svelte';
 	import InputTipoPagamento from './InputTipoPagamento.svelte';
 	import InputData from './InputData.svelte';
-	import { listarGastos, type Gasto, FiltroGastos as Filtro } from '$lib/armazenamento';
+	import { listarGastos, type Gasto, FiltroGastos as Filtro, contarGastos } from '$lib/armazenamento';
 	import { onMount } from 'svelte';
 	import { obterDigitosNF } from '$lib/utils';
-
+	import LazyTable from './LazyTable.svelte';
+	
 	const titulos = [
 		'Data',
 		'Fornecedor',
@@ -33,7 +34,7 @@
 		setor: false,
 		tipo_pagamento: false,
 		caixa: false
-	}
+	};
 
 	let filtroEl: HTMLElement;
 	let setorToggleEl: HTMLInputElement;
@@ -56,7 +57,7 @@
 	let somatorioValor = 0;
 	let digitosNF = 9;
 
-	let promessaGastos:Promise<any>;
+	let promessaGastos: Promise<any>;
 
 	function selecionarFiltro(e: any) {
 		algoModificado();
@@ -75,15 +76,13 @@
 	function algoModificado() {
 		//espera 1ms antes de agir para dar tempo de mudanças fazerem efeitos
 		setTimeout(() => {
-			
 			//copia valores relevantes de valoresReais para filtroAtual
 			for (const [key, value] of Object.entries(valorToggle)) {
-				if(value)
+				if (value)
 					// @ts-ignore
 					filtroAtual[key] = valoresReais[key];
-				else
-					// @ts-ignore
-					filtroAtual[key] = [''];
+				// @ts-ignore
+				else filtroAtual[key] = [''];
 			}
 			if (!filtroAplicado.equals(filtroAtual)) {
 				// console.log('diferentes');
@@ -93,7 +92,7 @@
 
 	function reset() {
 		console.log('resetting');
-		
+
 		dataInicialEl.reset();
 		dataFinalEl.reset();
 		fornecedorEl.reset();
@@ -102,8 +101,8 @@
 		pagamentoEl.reset();
 		caixaEl.reset();
 		setTimeout(() => {
-			console.log('valoresReais',valoresReais);
-			
+			console.log('valoresReais', valoresReais);
+
 			filtroEl.querySelectorAll<HTMLInputElement>("input[type='checkbox']").forEach((e) => {
 				if (e.checked) {
 					e.click();
@@ -119,24 +118,24 @@
 		carregarGastos();
 	}
 	function carregarGastos() {
-		console.log(filtroAplicado);
-		
-		promessaGastos = listarGastos(filtroAplicado, sortParameter)
-		promessaGastos.then((gastos) => {
-			gastosFiltrados = gastos;
-			somatorioValor = gastosFiltrados.reduce((a, b) => {
-				return a + b.valor;
-			}, 0);
-		});
+		// console.log(filtroAplicado);
+
+		// promessaGastos = listarGastos(filtroAplicado, sortParameter);
+		// promessaGastos.then((gastos) => {
+		// 	gastosFiltrados = gastos;
+		// 	somatorioValor = gastosFiltrados.reduce((a, b) => {
+		// 		return a + b.valor;
+		// 	}, 0);
+		// });
 	}
 	function setorModificado(v: string[]) {
-		if (filtroAtual.empresa.length>0 && filtroAtual.empresa[0] != v[0]) {
+		if (filtroAtual.empresa.length > 0 && filtroAtual.empresa[0] != v[0]) {
 			setTimeout(() => empresaToggleEl.click(), 1);
 		}
 		algoModificado();
 	}
 	function empresaModificada(v: string[]) {
-		if (filtroAtual.setor.length>0 && filtroAtual.setor[0] != v[0]) {
+		if (filtroAtual.setor.length > 0 && filtroAtual.setor[0] != v[0]) {
 			setTimeout(() => setorToggleEl.click(), 1);
 		}
 		algoModificado();
@@ -156,20 +155,45 @@
 			}
 		});
 	}
-	function formatarValor(v:number){
-		let s:string = `${v}`;
-		while(s.length<3) s = '0'+s;
-		return s.slice(0, s.length-2) + "," + s.slice(s.length-2);
+	function formatarValor(v: number) {
+		let s: string = `${v}`;
+		while (s.length < 3) s = '0' + s;
+		return s.slice(0, s.length - 2) + ',' + s.slice(s.length - 2);
 	}
-	function formatarNF(nf:number){
-		let s:string = `${nf}`;
-		while(s.length<digitosNF) s = '0'+s;
+	function formatarNF(nf: number) {
+		let s: string = `${nf}`;
+		while (s.length < digitosNF) s = '0' + s;
 		return s;
+	}
+
+	async function carregarValores(
+		offset: number,
+		limit: number,
+		sorterIndex: number,
+		sorterReverse: boolean
+	): Promise<string[][]> {
+		let resposta:string[][] = [];
+		(await listarGastos(filtroAplicado, { v: titulos[sorterIndex], d: sorterReverse },limit,offset)).forEach(
+			(gasto) => {
+				resposta.push([
+					new Date(gasto.data).toLocaleDateString('pt-br'),
+					gasto.fornecedor,
+					gasto.empresa,
+					gasto.setor,
+					formatarValor(gasto.valor),
+					gasto.pagamento,
+					formatarNF(gasto.nf),
+					gasto.caixa,
+					gasto.obs
+				]);
+			}
+		);
+		return resposta;
 	}
 
 	//data de 6 meses atras
 	let dataInicial = new Date();
-	dataInicial.setMonth( dataInicial.getMonth() - 6 );
+	dataInicial.setMonth(dataInicial.getMonth() - 6);
 
 	onMount(() => {
 		digitosNF = obterDigitosNF();
@@ -184,12 +208,12 @@
 			<h3>Data inicial</h3>
 			<div class="controls-holder">
 				<div class="input-holder">
-					<InputData 
+					<InputData
 						onChange={algoModificado}
 						bind:value={valoresReais.data_inicial[0]}
 						bind:this={dataInicialEl}
 						placeholder={dataInicial.toISOString().split('T')[0]}
-						/>
+					/>
 				</div>
 				<input
 					type="checkbox"
@@ -202,16 +226,13 @@
 			<h3>Data final</h3>
 			<div class="controls-holder">
 				<div class="input-holder">
-					<InputData 
+					<InputData
 						onChange={algoModificado}
 						bind:value={valoresReais.data_final[0]}
-						bind:this={dataFinalEl} />
+						bind:this={dataFinalEl}
+					/>
 				</div>
-				<input
-					type="checkbox"
-					on:change={selecionarFiltro}
-					bind:checked={valorToggle.data_final}
-				/>
+				<input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.data_final} />
 			</div>
 		</div>
 		<div>
@@ -225,11 +246,7 @@
 						bind:this={fornecedorEl}
 					/>
 				</div>
-				<input
-					type="checkbox"
-					on:change={selecionarFiltro}
-					bind:checked={valorToggle.fornecedor}
-				/>
+				<input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.fornecedor} />
 			</div>
 		</div>
 		<div>
@@ -300,11 +317,7 @@
 			<h3>Caixa de entrada</h3>
 			<div class="controls-holder">
 				<div class="input-holder">
-					<InputCaixa
-						onEdit={algoModificado}
-						bind:valor={valoresReais.caixa}
-						bind:this={caixaEl}
-					/>
+					<InputCaixa onEdit={algoModificado} bind:valor={valoresReais.caixa} bind:this={caixaEl} />
 				</div>
 				<input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.caixa} />
 			</div>
@@ -313,15 +326,12 @@
 		<button type="button" on:click={carregarGastosComNovoFiltro}>Buscar</button>
 	</div>
 	<div class="table-holder">
-		{#await gastosFiltrados}
-		<h1>Carregando</h1>
-		{:then promessaGastos}
-		<!-- Decide to send to registration or not -->
-		<!-- you can either use the recievedData or just omit it -->
-		{:catch}
-		<!-- Handle error -->
-		{/await}
-		<table>
+		<LazyTable 
+		{titulos}
+		 {carregarValores} 
+		 calcularMaxRows={contarGastos}
+		 />
+		<!-- <table>
 			<tr bind:this={tableHeaderEl}>
 				{#each titulos as titulo}
 					<th>
@@ -356,7 +366,7 @@
 					<td colspan="4"></td>
 				</tr>
 			</tfoot>
-		</table>
+		</table> -->
 	</div>
 </main>
 
@@ -370,10 +380,10 @@
 		flex: 1 0 250px;
 		border: 2px solid black;
 		background-color: var(--cor-tema-fraca);
-		
+
 		overflow-y: scroll;
 	}
-	.filtro h2{
+	.filtro h2 {
 		background-color: var(--cor-tema-forte);
 		margin: 0;
 		padding: 5px;
@@ -385,7 +395,6 @@
 		flex-grow: 1;
 		width: 100%;
 		font-weight: 500;
-		
 	}
 	.filtro > div {
 		display: flex;
@@ -412,7 +421,7 @@
 		--opacity: 0.5;
 		--pointer-events: all;
 	}
-	input[type="checkbox"]{
+	input[type='checkbox'] {
 		margin-left: 10px;
 	}
 	.input-holder::after {
@@ -425,9 +434,9 @@
 		pointer-events: var(--pointer-events);
 		border-radius: var(--tema-border-radius);
 		/* slightly transparent fallback */
-		background-color: rgba(255, 255, 255, .9);
+		background-color: rgba(255, 255, 255, 0.9);
 	}
-	
+
 	/* if backdrop support: very transparent and blurred */
 	@supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
 		.input-holder::after {
@@ -437,7 +446,7 @@
 		}
 	}
 
-	.filtro button{
+	.filtro button {
 		background-color: var(--cor-tema-forte);
 		border-radius: var(--tema-border-radius);
 		border: none;
