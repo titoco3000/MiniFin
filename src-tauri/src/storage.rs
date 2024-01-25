@@ -32,9 +32,9 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(local_banco_de_dados: PathBuf) -> Config{
-        Config{
-            local_banco_de_dados:local_banco_de_dados
+    pub fn new(local_banco_de_dados: PathBuf) -> Config {
+        Config {
+            local_banco_de_dados: local_banco_de_dados,
         }
     }
     pub fn ler() -> io::Result<Config> {
@@ -140,7 +140,7 @@ pub async fn criar_database(
         .salvar()?;
         Ok(())
     } else {
-        simple_error::bail!("Já tem database em {}",&db_url);
+        simple_error::bail!("Já tem database em {}", &db_url);
     }
 }
 
@@ -419,7 +419,12 @@ impl BancoDeDados {
         }
     }
 
-    pub async fn listar_gastos_filtrados(&mut self, filtro: &FiltroGasto) -> Vec<Gasto> {
+    pub async fn listar_gastos_filtrados(
+        &mut self,
+        filtro: &FiltroGasto,
+        limit: Option<u32>,
+        offset: Option<u32>,
+    ) -> Vec<Gasto> {
         println!("Vou trabalhar com o filtro: {:?}", filtro);
 
         let mut data: Vec<(Option<SqlDateTime>, Option<SqlDateTime>)> = Vec::new();
@@ -567,6 +572,12 @@ impl BancoDeDados {
             query += &condicoes;
             query += " )";
         }
+        if let Some(lim) = limit{
+            query += &format!(" LIMIT {}", lim);
+        }
+        if let Some(off) = offset{
+            query += &format!(" OFFSET {}", off);
+        }
 
         println!("Pedindo: \n\"{}\"", query);
 
@@ -594,6 +605,8 @@ impl BancoDeDados {
     pub async fn listar_gastos_filtrados_descompactados(
         &mut self,
         filtro: &FiltroGasto,
+        limit: Option<u32>,
+        offset: Option<u32>,
     ) -> Vec<serde_json::Value> {
         let (empresas, setores, caixas, pagamentos, fornecedores) = (
             self.listar_empresas().await,
@@ -603,7 +616,7 @@ impl BancoDeDados {
             self.listar_fornecedores().await,
         );
 
-        let lista = self.listar_gastos_filtrados(filtro).await;
+        let lista = self.listar_gastos_filtrados(filtro, limit, offset).await;
         lista
             .iter()
             .map(|gasto| {
@@ -1073,11 +1086,9 @@ impl BancoDeDados {
         fornecedores_path: &PathBuf,
         gastos_path: &PathBuf,
     ) -> Result<(), String> {
-
         println!("Importando CSVs");
         let fornecedores = std::fs::read_to_string(fornecedores_path).unwrap();
         let gastos = std::fs::read_to_string(gastos_path).unwrap();
-
 
         let mut caixas: Vec<&str> = Vec::with_capacity(20);
         let mut empresas: Vec<&str> = Vec::with_capacity(20);
@@ -1112,7 +1123,7 @@ impl BancoDeDados {
 
         for linha in gastos.split('\n') {
             let record: Vec<&str> = linha.split(',').collect();
-            
+
             if record.len() == 8 {
                 let empresa_setor: Vec<&str> = record[1].split('_').collect();
                 if !empresas.iter().find(|&x| x == &empresa_setor[0]).is_some() {
@@ -1136,7 +1147,10 @@ impl BancoDeDados {
             }
         }
 
-        println!("Registrando: {:#?}",(&caixas, &empresas, &setores, &pagamentos));
+        println!(
+            "Registrando: {:#?}",
+            (&caixas, &empresas, &setores, &pagamentos)
+        );
 
         self.registrar_basicos(&caixas, &empresas, &setores, &pagamentos)
             .await;
@@ -1172,38 +1186,58 @@ impl BancoDeDados {
             if record.len() == 8 {
                 let empresa_setor: Vec<&str> = record[1].split('_').collect();
 
-                let valor = record[3].parse::<f64>().expect(&format!("Erro no valor {}",record[3]));
-                let nf = record[5].parse::<u32>().expect(&format!("Erro na nf {}",record[5]));
-                let mut data = SqlDateTime::parse_from_str(record[2], "%d/%m/%Y").expect(&format!("Erro na data {}",record[2]));
+                let valor = record[3]
+                    .parse::<f64>()
+                    .expect(&format!("Erro no valor {}", record[3]));
+                let nf = record[5]
+                    .parse::<u32>()
+                    .expect(&format!("Erro na nf {}", record[5]));
+                let mut data = SqlDateTime::parse_from_str(record[2], "%d/%m/%Y")
+                    .expect(&format!("Erro na data {}", record[2]));
                 //datas no CSV podem estar com só dois digitos pro ano
-                if data.year()<2000{
-                    data = data.with_year(data.year()+2000).expect("Erro ao modificar data");
+                if data.year() < 2000 {
+                    data = data
+                        .with_year(data.year() + 2000)
+                        .expect("Erro ao modificar data");
                 }
-                let setor = self.obter_setor(empresa_setor[1], empresa_setor[0]).await.expect(&format!("Erro no setor {:?}",(empresa_setor[1], empresa_setor[0])));
-                let caixa = self.obter_caixa(record[6]).await.expect(&format!("Erro n caixa {}",record[6]));
-                let pagamento = self.obter_tipo_pagamento(record[4]).await.expect(&format!("Erro no pagamento {}",record[4]));
-                let fornecedor = match self.obter_fornecedor(record[0]).await{
-                    Some(f)=>f,
-                    None=>{
-                        self.registrar_ou_atualizar_fornecedor(record[0], &setor, &pagamento, &caixa).await
-                        .expect(&format!("Erro ao registrar fornecedor desconhecido: {}",record[0]))
-                    }
+                let setor = self
+                    .obter_setor(empresa_setor[1], empresa_setor[0])
+                    .await
+                    .expect(&format!(
+                        "Erro no setor {:?}",
+                        (empresa_setor[1], empresa_setor[0])
+                    ));
+                let caixa = self
+                    .obter_caixa(record[6])
+                    .await
+                    .expect(&format!("Erro n caixa {}", record[6]));
+                let pagamento = self
+                    .obter_tipo_pagamento(record[4])
+                    .await
+                    .expect(&format!("Erro no pagamento {}", record[4]));
+                let fornecedor = match self.obter_fornecedor(record[0]).await {
+                    Some(f) => f,
+                    None => self
+                        .registrar_ou_atualizar_fornecedor(record[0], &setor, &pagamento, &caixa)
+                        .await
+                        .expect(&format!(
+                            "Erro ao registrar fornecedor desconhecido: {}",
+                            record[0]
+                        )),
                 };
-                
 
-                self
-                    .registrar_gasto(
-                        (valor*100.0) as u32,
-                        nf,
-                        data,
-                        &setor,
-                        &caixa,
-                        &pagamento,
-                        &fornecedor,
-                        record[7].to_owned(),
-                    )
-                    .await.expect("Erro ao registrar gasto");
-
+                self.registrar_gasto(
+                    (valor * 100.0) as u32,
+                    nf,
+                    data,
+                    &setor,
+                    &caixa,
+                    &pagamento,
+                    &fornecedor,
+                    record[7].to_owned(),
+                )
+                .await
+                .expect("Erro ao registrar gasto");
             } else {
                 println!("Não fez a linha: \"{}\"", linha);
             }
@@ -1249,7 +1283,10 @@ impl BancoDeDados {
             let id_empresa = self
                 .obter_empresa(empresa)
                 .await
-                .expect(&format!("Tentando adicionar setor a empresa inexistente ({})",empresa))
+                .expect(&format!(
+                    "Tentando adicionar setor a empresa inexistente ({})",
+                    empresa
+                ))
                 .id;
             sqlx::query(&format!(
                 "INSERT INTO Setores 

@@ -78,7 +78,7 @@ fn listar_gastos(
         database
             .lock()
             .unwrap().as_mut().unwrap()
-            .listar_gastos_filtrados_descompactados(&filtro),
+            .listar_gastos_filtrados_descompactados(&filtro, None, None),
     ))
     .unwrap()
 }
