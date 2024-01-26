@@ -87,10 +87,10 @@ export class FiltroGastos {
 	}
 }
 
-export async function listarGastos(filtro:FiltroGastos, sortParameter:{v:string, d:boolean}, limit:number, offset:number): Promise<Gasto[]> {
+export async function listarGastos(filtro:FiltroGastos, sortParameter:{i:number, d:boolean}, limit:number, offset:number): Promise<Gasto[]> {
 	let jsonified = JSON.stringify(filtro);
 	console.log("Pedindo com parametro:",jsonified);
-	let v:string = await invoke('listar_gastos',{filtro: filtro,limit:limit, offset:offset});
+	let v:string = await invoke('listar_gastos',{filtro: filtro,limit:limit, offset:offset, sorter:sortParameter});
 	console.log("Recebi; ",JSON.parse(v));
 	
 	return JSON.parse(v);

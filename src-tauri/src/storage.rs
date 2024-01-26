@@ -597,15 +597,51 @@ impl BancoDeDados {
         filtro: &FiltroGasto,
         limit: Option<u32>,
         offset: Option<u32>,
+        sorter:&SortParameter
     ) -> Vec<Gasto> {
-        let mut query = String::from("SELECT * from Gastos");
+        let mut query = String::from("SELECT Gastos.* from Gastos ");
         let condicoes = &self.filtro_into_query(filtro).await;
+
+        /*
+        'Data',
+		'Fornecedor',
+		'Empresa',
+		'Setor',
+		'Valor',
+		'Pagamento',
+		'NF',
+		'Caixa',
+		'Observações'
+         */
+        let (joiner, order_by) = 
+        match sorter.i {
+            0 => ("", "Gastos.data"),
+            1 => ("JOIN Fornecedores ON Gastos.id_fornecedor = Fornecedores.id","Fornecedores.nome"),
+            2 => ("JOIN Setores ON Gastos.id_setor = Setores.id JOIN Empresas ON Setores.id = Empresas.id","Empresas.nome"),
+            3 => ("JOIN Setores ON Gastos.id_setor = Setores.id","Setores.nome"),
+            4 => ("","Gastos.valor"),
+            5 => ("JOIN TiposDePagamento ON Gastos.id_tipo_pagamento = TiposDePagamento.id","TiposDePagamento.nome"),
+            6 => ("","Gastos.nf"),
+            7 => ("JOIN CaixasDeEntrada ON Gastos.id_caixa = CaixasDeEntrada.id","CaixasDeEntrada.nome"),
+            8 => ("","Gastos.obs"),
+            _ => panic!("ordenamento não planejado")
+        };
+
+        query+=joiner;
 
         if !condicoes.is_empty() {
             query += " WHERE (";
             query += &condicoes;
             query += " )";
         }
+        
+        query+=" ORDER BY ";
+        query+=order_by;
+        query+=" COLLATE NOCASE";
+        if sorter.d{
+            query+=" DESC";
+        }
+
         if let Some(lim) = limit{
             query += &format!(" LIMIT {}", lim);
         }
@@ -629,6 +665,7 @@ impl BancoDeDados {
         filtro: &FiltroGasto,
         limit: Option<u32>,
         offset: Option<u32>,
+        sorter:&SortParameter
     ) -> Vec<serde_json::Value> {
         let (empresas, setores, caixas, pagamentos, fornecedores) = (
             self.listar_empresas().await,
@@ -638,7 +675,7 @@ impl BancoDeDados {
             self.listar_fornecedores().await,
         );
 
-        let lista = self.listar_gastos_filtrados(filtro, limit, offset).await;
+        let lista = self.listar_gastos_filtrados(filtro, limit, offset,sorter).await;
         lista
             .iter()
             .map(|gasto| {

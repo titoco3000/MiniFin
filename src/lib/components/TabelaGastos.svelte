@@ -53,7 +53,7 @@
 	let gastosFiltrados: Gasto[] = [];
 
 	// direção: 0 para menor ao maior
-	let sortParameter = { v: titulos[0], d: false };
+	let sortParameter = { i: 0, d: false };
 
 	let somatorioValor = '0';
 	let digitosNF = 9;
@@ -122,6 +122,7 @@
 		carregarGastos();
 	}
 	function carregarGastos() {
+		alert("isso não deveria ser chamado");
 		// console.log(filtroAplicado);
 
 		// promessaGastos = listarGastos(filtroAplicado, sortParameter);
@@ -184,7 +185,7 @@
 		sorterReverse: boolean
 	): Promise<string[][]> {
 		let resposta:string[][] = [];
-		(await listarGastos(filtroAplicado, { v: titulos[sorterIndex], d: sorterReverse },limit,offset)).forEach(
+		(await listarGastos(filtroAplicado, { i: sorterIndex, d: sorterReverse },limit,offset)).forEach(
 			(gasto) => {
 				resposta.push([
 					new Date(gasto.data).toLocaleDateString('pt-br'),

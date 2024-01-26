@@ -5,6 +5,7 @@ pub mod storage;
 pub mod tipos;
 
 use futures::executor;
+use tipos::SortParameter;
 use std::{path::PathBuf, sync::Mutex};
 use storage::BancoDeDados;
 
@@ -75,12 +76,13 @@ fn listar_gastos(
     filtro: tipos::FiltroGasto,
     limit:u32,
     offset:u32,
+    sorter:SortParameter
 ) -> String {
     serde_json::to_string(&executor::block_on(
         database
             .lock()
             .unwrap().as_mut().unwrap()
-            .listar_gastos_filtrados_descompactados(&filtro, Some(limit), Some(offset)),
+            .listar_gastos_filtrados_descompactados(&filtro, Some(limit), Some(offset), &sorter),
     ))
     .unwrap()
 }
