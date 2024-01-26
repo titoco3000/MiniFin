@@ -1,26 +1,15 @@
-dev command: pnpm run dev
-build command: pnpm run build
-dev server url: http://localhost:5173
-
-Componentes a serem feitos:
-- input fornecedor - ok
-- input nota fiscal - ok
-- input valor - ok
-- dropdowns - ok
-- ocultar dropdown no clique - ok, sketchy
-- Tabela completa - ok
-
- Essas outras todas ok, na tabela principal
-- Tabela gasto total por fornecedor
-- Tabela gasto por area
-- Tabela compras por fornecedor
-- Tabela compras por area
-
-- mensagem sucesso & erro - ok
-- CSS atualizado
-- filtro formulario
-- fazer o formulário
-- conectar com backend rust
+dev command: npm run dev
+build command: npm run build
 
 tive que instalar
 npm add -D @tauri-apps/api
+
+A fazer:
+- formulario de confirmação
+- pesquisa bruta
+- edição de gasto
+- edição de fornecedor
+- imprimir tabela inteira
+- Configuração básica novo usuario
+- Localizar banco
+
