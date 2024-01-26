@@ -168,3 +168,6 @@ export async function definirLocalDB(local:string) {
 export async function contarGastos():Promise<number> {
 	return await invoke('contar_gastos');
 }
+export async function somarGastos(filtro:FiltroGastos):Promise<number> {
+	return await invoke('somar_gastos',{filtro:filtro});
+}

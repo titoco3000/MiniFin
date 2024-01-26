@@ -156,6 +156,13 @@ fn contar_gastos(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> u32
             .lock()
             .unwrap().as_mut().unwrap().contar_gastos())
 }
+#[tauri::command]
+fn somar_gastos(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,filtro: tipos::FiltroGasto) -> u32{
+    executor::block_on(
+        database
+            .lock()
+            .unwrap().as_mut().unwrap().somar_gastos(&filtro))
+}
 fn main() {
     let db_mutex = Mutex::new( match storage::Config::ler() {
         Ok(_config_file) => match executor::block_on(storage::BancoDeDados::abrir()) {
@@ -184,7 +191,8 @@ fn main() {
         importar_csv_aldeia,
         checar_tipo_de_janela,
         definir_local_bd,
-        contar_gastos
+        contar_gastos,
+        somar_gastos
     ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -428,6 +428,23 @@ impl BancoDeDados {
         .await.expect("Erro ao contar").get::<u32,usize>(0)
     }
     
+    pub async fn somar_gastos(&mut self, filtro: &FiltroGasto)->u32{
+        let mut query = String::from("SELECT sum(valor) from Gastos");
+        let condicoes = &self.filtro_into_query(filtro).await;
+
+        if !condicoes.is_empty() {
+            query += " WHERE (";
+            query += &condicoes;
+            query += " )";
+        }
+
+        sqlx::query(
+            &query
+        )
+        .fetch_one(&self.0)
+        .await.expect("Erro ao somar").get::<u32,usize>(0)
+
+    }
     pub async fn filtro_into_query(&mut self, filtro: &FiltroGasto)->String{
         
         let mut data: Vec<(Option<SqlDateTime>, Option<SqlDateTime>)> = Vec::new();
@@ -581,8 +598,6 @@ impl BancoDeDados {
         limit: Option<u32>,
         offset: Option<u32>,
     ) -> Vec<Gasto> {
-        println!("Vou trabalhar com o filtro: {:?}", filtro);
-
         let mut query = String::from("SELECT * from Gastos");
         let condicoes = &self.filtro_into_query(filtro).await;
 
@@ -767,12 +782,6 @@ impl BancoDeDados {
         }
     }
 
-    /*
-       "nenhum valor recebido
-       nenhum caixa recebido
-       formato de data incorreto
-       nenhuma nf recebida"
-    */
     pub async fn registrar_gasto_de_json(
         &mut self,
         json_str: &str,

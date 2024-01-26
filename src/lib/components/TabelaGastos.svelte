@@ -5,7 +5,7 @@
 	import InputEmpresa from './InputEmpresa.svelte';
 	import InputTipoPagamento from './InputTipoPagamento.svelte';
 	import InputData from './InputData.svelte';
-	import { listarGastos, type Gasto, FiltroGastos as Filtro, contarGastos } from '$lib/armazenamento';
+	import { listarGastos, type Gasto, FiltroGastos as Filtro, contarGastos, somarGastos } from '$lib/armazenamento';
 	import { onMount } from 'svelte';
 	import { obterDigitosNF } from '$lib/utils';
 	import LazyTable from './LazyTable.svelte';
@@ -40,6 +40,7 @@
 	let setorToggleEl: HTMLInputElement;
 	let empresaToggleEl: HTMLInputElement;
 	let tableHeaderEl: HTMLElement;
+	let lazyTableEl:LazyTable;
 
 	let dataInicialEl: InputData;
 	let dataFinalEl: InputData;
@@ -54,7 +55,7 @@
 	// direção: 0 para menor ao maior
 	let sortParameter = { v: titulos[0], d: false };
 
-	let somatorioValor = 0;
+	let somatorioValor = '0';
 	let digitosNF = 9;
 
 	let promessaGastos: Promise<any>;
@@ -115,6 +116,9 @@
 	function carregarGastosComNovoFiltro() {
 		//copia filtro
 		filtroAplicado = Object.assign(new Filtro(), JSON.parse(JSON.stringify(filtroAtual)));
+		somarGastos(filtroAplicado).then(v=>{
+			somatorioValor = formatarValor(v);
+		});
 		carregarGastos();
 	}
 	function carregarGastos() {
@@ -330,6 +334,7 @@
 		{titulos}
 		 {carregarValores} 
 		 calcularMaxRows={contarGastos}
+		 bind:valorInferior = {somatorioValor}
 		 />
 		<!-- <table>
 			<tr bind:this={tableHeaderEl}>

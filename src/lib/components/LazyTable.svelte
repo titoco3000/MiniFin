@@ -3,7 +3,8 @@
 	import arrow from '$lib/assets/arrow.svg';
 
 	export let titulos = ['a', 'b', 'c', 'd', 'e'];
-	export let infoInferior = ['soma', 'nº'];
+	export let legendaInferior = 'Total';
+	export let valorInferior = '';
 	export let batchSize = 40;
 	export let calcularMaxRows = async (): Promise<number> => {
 		return 1000;
@@ -86,9 +87,6 @@
 			//  firstVisibleIndex = Math.ceil(mainEl.scrollTop / tbodyEl.children[0].getBoundingClientRect().height);
 			//caso queira mostrar do primeiro ao ultimo
 
-			console.log(valorScroll);
-			
-
 			firstVisibleIndex = Math.max(
 				Math.min(1, tbodyEl.childElementCount),
 				Math.round(valorScroll * offset)
@@ -112,6 +110,7 @@
 		sorterIndex = index;
 		reset();
 	}
+
 
 	onMount(() => {
 		tdBlueprint.style.display = 'none';
@@ -143,12 +142,9 @@
 		<tbody bind:this={tbodyEl}> </tbody>
 		<tfoot>
 			<tr>
-				{#each infoInferior as item}
-					<td>
-						{item}
-					</td>
-				{/each}
-				<td>
+				<td colspan={(titulos.length-2)-Math.floor((titulos.length-2)/2)} style="text-align: right;">{legendaInferior}</td>
+				<td colspan={Math.floor((titulos.length-2)/2)}>{valorInferior}</td>
+				<td colspan="2" style="text-align: right;">
 					{firstVisibleIndex}/{maxRows}
 				</td>
 			</tr>
