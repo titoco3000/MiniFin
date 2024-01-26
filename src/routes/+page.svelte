@@ -31,7 +31,7 @@
 			if(resultado == "instalacao")
 				window.location.replace("instalacao");
 			else
-				window.location.replace("main");
+				window.location.replace("form");
 			
 		})
 	});

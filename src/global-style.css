@@ -38,6 +38,8 @@ body{
     --cor-tema-detalhes: #000000;
     --tema-border-radius: 5px;
     --tema-altura-input:30px;
+
+    overflow: hidden;
 }
 @media screen and (max-height: 600px) {
     body{

@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { appWindow } from '@tauri-apps/api/window';
+	import { onMount } from 'svelte';
+	export let inicial = 0;
+	
 	let tabsEl: HTMLElement;
 	function cliqueTab(evento: Event) {
+		window.location.replace("form");
 		console.log('clique');
-
+		
 		if (evento.target) {
 			let i = 0;
 			for (let child of tabsEl.children) {
@@ -23,15 +27,26 @@
 			}
 		}
 	}
+	
+	onMount(()=>{
+		let child = tabsEl.children[inicial+1];
+		if(child){
+			(child as HTMLElement).style.setProperty('--cor-principal', 'var(--cor-tema-forte)');
+			(child as HTMLElement).style.setProperty('--cor-fundo', 'white');
+			(child as HTMLElement).style.setProperty('cursor', 'default');
+			(child as HTMLElement).style.borderRadius = '10px 10px 0 0';
+		}
+	})
 </script>
 
 <nav>
 	<div id="tabs" bind:this={tabsEl}>
-		<button on:click={cliqueTab}><span>Formulário</span></button>
-		<button on:click={cliqueTab}><span>Visualizar</span></button>
-		<button on:click={cliqueTab}><span>Ferramentas</span></button>
+		<div class="logo-holder"></div>
+		<button on:click={()=>{window.location.replace("form")}}><span>Formulário</span></button>
+		<button on:click={()=>{window.location.replace("viz")}}><span>Visualizar</span></button>
+		<button on:click={()=>{window.location.replace("ferramentas")}}><span>Ferramentas</span></button>
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div class="spacer" on:mousedown={appWindow.startDragging} on:mouseup={appWindow.stopDragging}></div>
+		<div class="spacer" on:mousedown={appWindow.startDragging}></div>
 	</div>
 	<div id="window-buttons">
 		<button id="minimize" on:click={appWindow.minimize}></button>
@@ -80,10 +95,6 @@
 		--cor-fundo: var(--cor-tema-fundo-1);
 		--cor-principal: var(--cor-tema-fraca);
 	}
-	#tabs button:first-child {
-		--cor-fundo: white;
-		--cor-principal: var(--cor-tema-forte);
-	}
 	#tabs button {
 		cursor: pointer;
 		width: 100px;
@@ -97,6 +108,11 @@
 		background-color: var(--cor-principal);
 	}
 
+	#tabs .logo-holder {
+		width: 10px;
+		border-bottom-left-radius: 0;
+
+	}
 	#tabs .spacer {
 		flex-grow: 1;
 		flex-shrink: 1;
