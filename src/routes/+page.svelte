@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { invoke } from '@tauri-apps/api/tauri'
-	import LazyTable from '$lib/components/LazyTable.svelte';
 
 	let loadingEl: HTMLCanvasElement;
 
@@ -38,11 +37,8 @@
 </script>
 
 <main>
-	<LazyTable />
-	<div class="splash">
-		<h1>Raja</h1>
-		<canvas bind:this={loadingEl} width="200" height="200"></canvas>
-	</div>
+	<h1>Raja</h1>
+	<canvas bind:this={loadingEl} width="200" height="200"></canvas>
 </main>
 
 <style>
@@ -51,10 +47,6 @@
 		width: 100vw;
 		margin: 0;
 		padding: 0;
-	}
-	.splash {
-		height: 100%;
-		width: 100%;
 		background-color: var(--cor-tema-fundo-1);
 		display: flex;
 		flex-direction: column;
