@@ -5,11 +5,17 @@
 	import InputEmpresa from './InputEmpresa.svelte';
 	import InputTipoPagamento from './InputTipoPagamento.svelte';
 	import InputData from './InputData.svelte';
-	import { listarGastos, type Gasto, FiltroGastos as Filtro, contarGastos, somarGastos } from '$lib/armazenamento';
+	import {
+		listarGastos,
+		type Gasto,
+		FiltroGastos as Filtro,
+		contarGastos,
+		somarGastos
+	} from '$lib/armazenamento';
 	import { onMount } from 'svelte';
 	import { obterDigitosNF } from '$lib/utils';
 	import LazyTable from './LazyTable.svelte';
-	
+
 	const titulos = [
 		'Data',
 		'Fornecedor',
@@ -40,7 +46,7 @@
 	let setorToggleEl: HTMLInputElement;
 	let empresaToggleEl: HTMLInputElement;
 	let tableHeaderEl: HTMLElement;
-	let lazyTableEl:LazyTable;
+	let lazyTableEl: LazyTable;
 
 	let dataInicialEl: InputData;
 	let dataFinalEl: InputData;
@@ -57,8 +63,6 @@
 
 	let somatorioValor = '0';
 	let digitosNF = 9;
-
-	let promessaGastos: Promise<any>;
 
 	function selecionarFiltro(e: any) {
 		algoModificado();
@@ -114,24 +118,14 @@
 	}
 
 	function carregarGastosComNovoFiltro() {
+		console.log('carregarGastosComNovoFiltro');
+
 		//copia filtro
 		filtroAplicado = Object.assign(new Filtro(), JSON.parse(JSON.stringify(filtroAtual)));
-		somarGastos(filtroAplicado).then(v=>{
+		somarGastos(filtroAplicado).then((v) => {
 			somatorioValor = formatarValor(v);
 		});
-		carregarGastos();
-	}
-	function carregarGastos() {
-		alert("isso não deveria ser chamado");
-		// console.log(filtroAplicado);
-
-		// promessaGastos = listarGastos(filtroAplicado, sortParameter);
-		// promessaGastos.then((gastos) => {
-		// 	gastosFiltrados = gastos;
-		// 	somatorioValor = gastosFiltrados.reduce((a, b) => {
-		// 		return a + b.valor;
-		// 	}, 0);
-		// });
+		lazyTableEl.reset();
 	}
 	function setorModificado(v: string[]) {
 		if (filtroAtual.empresa.length > 0 && filtroAtual.empresa[0] != v[0]) {
@@ -145,27 +139,14 @@
 		}
 		algoModificado();
 	}
-	function headerButtonClick(titulo: string) {
-		if (sortParameter.v == titulo) sortParameter.d = !sortParameter.d;
-		else sortParameter.v = titulo;
-		carregarGastos();
-		titulos.forEach((value, i) => {
-			let el = (tableHeaderEl.childNodes[i] as Element).querySelector('span');
-			if (el) {
-				if (value == sortParameter.v) {
-					el.style.display = 'block';
-					if (sortParameter.d) el.style.rotate = '0deg';
-					else el.style.rotate = '180deg';
-				} else el.style.display = 'none';
-			}
-		});
-	}
 	function formatarValor(v: number) {
 		let s: string = `${v}`;
 		while (s.length < 3) s = '0' + s;
 		let inteira = s.slice(0, s.length - 2);
-		let pontuada = inteira.slice(0, inteira.length%3)+inteira.slice(inteira.length%3).replace(/.{3}/g, '.$&');
-		if(pontuada[0]=='.'){
+		let pontuada =
+			inteira.slice(0, inteira.length % 3) +
+			inteira.slice(inteira.length % 3).replace(/.{3}/g, '.$&');
+		if (pontuada[0] == '.') {
 			pontuada = pontuada.slice(1);
 		}
 		//.split('').reverse().join('').replace(/.{3}/g, '$&.').split('').reverse().join('')
@@ -184,22 +165,22 @@
 		sorterIndex: number,
 		sorterReverse: boolean
 	): Promise<string[][]> {
-		let resposta:string[][] = [];
-		(await listarGastos(filtroAplicado, { i: sorterIndex, d: sorterReverse },limit,offset)).forEach(
-			(gasto) => {
-				resposta.push([
-					new Date(gasto.data).toLocaleDateString('pt-br'),
-					gasto.fornecedor,
-					gasto.empresa,
-					gasto.setor,
-					formatarValor(gasto.valor),
-					gasto.pagamento,
-					formatarNF(gasto.nf),
-					gasto.caixa,
-					gasto.obs
-				]);
-			}
-		);
+		let resposta: string[][] = [];
+		(
+			await listarGastos(filtroAplicado, { i: sorterIndex, d: sorterReverse }, limit, offset)
+		).forEach((gasto) => {
+			resposta.push([
+				new Date(gasto.data).toLocaleDateString('pt-br'),
+				gasto.fornecedor,
+				gasto.empresa,
+				gasto.setor,
+				formatarValor(gasto.valor),
+				gasto.pagamento,
+				formatarNF(gasto.nf),
+				gasto.caixa,
+				gasto.obs
+			]);
+		});
 		return resposta;
 	}
 
@@ -338,12 +319,13 @@
 		<button type="button" on:click={carregarGastosComNovoFiltro}>Buscar</button>
 	</div>
 	<div class="table-holder">
-		<LazyTable 
-		{titulos}
-		 {carregarValores} 
-		 calcularMaxRows={contarGastos}
-		 bind:valorInferior = {somatorioValor}
-		 />
+		<LazyTable
+			bind:this={lazyTableEl}
+			{titulos}
+			{carregarValores}
+			calcularMaxRows={contarGastos}
+			bind:valorInferior={somatorioValor}
+		/>
 		<!-- <table>
 			<tr bind:this={tableHeaderEl}>
 				{#each titulos as titulo}
