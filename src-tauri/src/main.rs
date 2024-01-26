@@ -1,6 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use window_shadows::set_shadow;
+use tauri::Manager;
+
 pub mod storage;
 pub mod tipos;
 
@@ -179,8 +182,14 @@ fn main() {
             None
         }
     });
+
     tauri::Builder::default()
     .manage(db_mutex)
+    .setup(|app| {
+        let window = app.get_window("main").unwrap();
+        set_shadow(&window, true).expect("Unsupported platform!");
+        Ok(())
+    })
     .invoke_handler(tauri::generate_handler![
         listar_caixas,
         listar_tipos_pagamento,

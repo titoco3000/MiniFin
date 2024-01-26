@@ -5,6 +5,7 @@
 	import PaginaFerramentas from '$lib/components/PaginaFerramentas.svelte';
 	import { onMount } from 'svelte';
 	import Dropdown from '$lib/components/Dropdown.svelte';
+	import TopHeader from '$lib/components/TopHeader.svelte';
 
 	let navEl: HTMLElement;
 	let formSecEl: HTMLElement;
@@ -39,6 +40,7 @@
 	});
 </script>
 <main>
+	<TopHeader />
 	<nav bind:this={navEl}>
 		<button
 			on:click={(e) => {
@@ -83,6 +85,7 @@
 		width: 100vw;
 	}
 	nav {
+		display: none;
 		background-color: var(--cor-tema-fundo-1);	
 		margin: 0;
 		padding-left: 10px;
