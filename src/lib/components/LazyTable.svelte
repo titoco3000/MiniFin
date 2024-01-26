@@ -158,7 +158,8 @@
 	main {
 		width: 100%;
 		height: 100%;
-		overflow: auto;
+		overflow-y: scroll;
+		overflow-x: hidden;
 		padding: 0;
 	}
 	table {
@@ -186,6 +187,7 @@
 		position: sticky;
 		bottom: 0; /* Don't forget this, required for the stickiness */
 		background-color: var(--cor-tema-fraca);
+		padding: 5px;
 	}
 	thead button {
 		display: flex;
