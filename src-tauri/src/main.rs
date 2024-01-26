@@ -73,12 +73,14 @@ fn registrar_gasto(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, json
 fn listar_gastos(
     database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
     filtro: tipos::FiltroGasto,
+    limit:u32,
+    offset:u32,
 ) -> String {
     serde_json::to_string(&executor::block_on(
         database
             .lock()
             .unwrap().as_mut().unwrap()
-            .listar_gastos_filtrados_descompactados(&filtro),
+            .listar_gastos_filtrados_descompactados(&filtro, Some(limit), Some(offset)),
     ))
     .unwrap()
 }
@@ -147,6 +149,13 @@ fn definir_local_bd(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, loc
     }).expect("Erro ao jsonificar")
 }
 
+#[tauri::command]
+fn contar_gastos(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> u32{
+    executor::block_on(
+        database
+            .lock()
+            .unwrap().as_mut().unwrap().contar_gastos())
+}
 fn main() {
     let db_mutex = Mutex::new( match storage::Config::ler() {
         Ok(_config_file) => match executor::block_on(storage::BancoDeDados::abrir()) {
@@ -174,7 +183,8 @@ fn main() {
         registrar_gasto,
         importar_csv_aldeia,
         checar_tipo_de_janela,
-        definir_local_bd
+        definir_local_bd,
+        contar_gastos
     ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

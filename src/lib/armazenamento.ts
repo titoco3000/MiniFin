@@ -87,10 +87,10 @@ export class FiltroGastos {
 	}
 }
 
-export async function listarGastos(filtro:FiltroGastos, sortParameter:{v:string, d:boolean}): Promise<Gasto[]> {
+export async function listarGastos(filtro:FiltroGastos, sortParameter:{v:string, d:boolean}, limit:number, offset:number): Promise<Gasto[]> {
 	let jsonified = JSON.stringify(filtro);
 	console.log("Pedindo com parametro:",jsonified);
-	let v:string = await invoke('listar_gastos',{filtro: filtro});
+	let v:string = await invoke('listar_gastos',{filtro: filtro,limit:limit, offset:offset});
 	console.log("Recebi; ",JSON.parse(v));
 	
 	return JSON.parse(v);
@@ -164,4 +164,7 @@ export async function importarCSVs(fornecedores:string, gastos:string) {
 export async function definirLocalDB(local:string) {
 	let v:string = await invoke('definir_local_bd',{local:local});
 	return JSON.parse(v);
+}
+export async function contarGastos():Promise<number> {
+	return await invoke('contar_gastos');
 }

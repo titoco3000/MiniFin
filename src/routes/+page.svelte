@@ -1,12 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { emit, listen } from '@tauri-apps/api/event';
 	import { invoke } from '@tauri-apps/api/tauri'
+	import LazyTable from '$lib/components/LazyTable.svelte';
 
-
-	listen('tipo-de-janela', (event) => {
-		console.log(event);
-	});
 	let loadingEl: HTMLCanvasElement;
 
 	function drawArc() {
@@ -42,6 +38,7 @@
 </script>
 
 <main>
+	<LazyTable />
 	<div class="splash">
 		<h1>Raja</h1>
 		<canvas bind:this={loadingEl} width="200" height="200"></canvas>
