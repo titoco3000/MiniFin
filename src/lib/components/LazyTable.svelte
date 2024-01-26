@@ -23,6 +23,8 @@
 	};
 
 	export function reset() {
+		console.log('reset table');
+		
 		calcularMaxRows().then((v) => {
 			maxRows = v;
 		});
