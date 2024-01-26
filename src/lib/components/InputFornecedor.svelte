@@ -160,9 +160,9 @@
 		padding: 0;
 		display: flex;
 		width: 100%;
-		height: 40px;
-		/* box-sizing: border-box; */
+		height: var(--tema-altura-input);
 		background-color: white;
+		border-radius: var(--tema-border-radius);
 	}
 	label {
 		position: relative;
@@ -182,6 +182,7 @@
 		min-width: 0;
 		outline: none;
 		box-sizing: border-box;
+		border-radius: var(--tema-border-radius);
 	}
 	ul {
 		position: absolute;
@@ -190,7 +191,7 @@
 		background-color: white;
 		width: 100%;
 		box-sizing: border-box;
-		top: 22px;
+		top: calc( var(--tema-altura-input) - 14px );
 		z-index: 10;
 		border-top: 0;
 	}

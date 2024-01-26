@@ -18,7 +18,7 @@ input{
 }
 input[type=date]{
     width: 100%;
-    height: 40px;
+    height: var(--tema-altura-input);
     border: 2px solid var(--cor-tema-detalhes);
     text-align: center;
     padding-top: 4px;
@@ -37,6 +37,17 @@ body{
     --cor-tema-fraca: #ffeeb2;
     --cor-tema-detalhes: #000000;
     --tema-border-radius: 5px;
+    --tema-altura-input:30px;
+}
+@media screen and (max-height: 600px) {
+    body{
+        --tema-altura-input:25px;
+    }
+}
+@media screen and (max-height: 500px) {
+    body{
+        --tema-altura-input:20px;
+    }
 }
 button{
     cursor: pointer;

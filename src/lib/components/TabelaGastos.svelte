@@ -409,7 +409,7 @@
 		position: relative;
 		padding: 0px;
 		width: 100%;
-		height: 40px;
+		height: var(--tema-altura-input);
 		margin: 0;
 		min-width: 0;
 		--blur-amount: 1px;

@@ -77,7 +77,7 @@
 		border: 2px solid var(--cor-tema-detalhes);
 		border-radius: var(--tema-border-radius);
 		font-size: 16px;
-		height: 40px;
+		height: var(--tema-altura-input);
 		box-sizing: border-box;
 	}
 </style>

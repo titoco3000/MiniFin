@@ -141,7 +141,7 @@
 		width: 90%;
 		max-width: 900px;
 		margin: auto;
-		margin-top: 40px;
+		margin-top: var(--tema-altura-input);
 	}
 	#result-box {
 		padding: 0;
@@ -193,7 +193,7 @@
 		padding: 0px;
 		box-sizing: border-box;
 		width: 100%;
-		height: 40px;
+		height: var(--tema-altura-input);
 		margin: 0;
 	}
 	.text-area-holder {

@@ -34,7 +34,7 @@
 <style>
     main{
         width: 100%;
-        height: 40px;
+        height: var(--tema-altura-input);
         position: relative;
     }
     input{

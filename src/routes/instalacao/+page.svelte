@@ -131,7 +131,7 @@
 		border: none;
 		border-radius: var(--tema-border-radius);
 		margin: 10px;
-		min-height: 40px;
+		min-height: var(--tema-altura-input);
 		font-size: 16px;
 	}
 	.CSV-choosers {
