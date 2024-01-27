@@ -39,15 +39,15 @@
 		empresa: false,
 		setor: false,
 		tipo_pagamento: false,
-		caixa: false
+		caixa: false,
+		conteudo: false
 	};
 
 	let filtroEl: HTMLElement;
 	let setorToggleEl: HTMLInputElement;
 	let empresaToggleEl: HTMLInputElement;
-	let tableHeaderEl: HTMLElement;
 	let lazyTableEl: LazyTable;
-
+	
 	let dataInicialEl: InputData;
 	let dataFinalEl: InputData;
 	let fornecedorEl: { reset: Function };
@@ -55,11 +55,7 @@
 	let setorEl: { reset: Function };
 	let pagamentoEl: { reset: Function };
 	let caixaEl: { reset: Function };
-
-	let gastosFiltrados: Gasto[] = [];
-
-	// direção: 0 para menor ao maior
-	let sortParameter = { i: 0, d: false };
+	let conteudoEl: HTMLInputElement;
 
 	let somatorioValor = '0';
 	let digitosNF = 9;
@@ -105,6 +101,7 @@
 		setorEl.reset();
 		pagamentoEl.reset();
 		caixaEl.reset();
+		conteudoEl.value = '';
 		setTimeout(() => {
 			console.log('valoresReais', valoresReais);
 
@@ -158,6 +155,10 @@
 		while (s.length < digitosNF) s = '0' + s;
 		return s;
 	}
+	function formatarData(dataStr:string){
+		let s = dataStr.split('-');
+		return s[2]+'/'+s[1]+'/'+s[0];
+	}
 
 	async function carregarValores(
 		offset: number,
@@ -170,7 +171,7 @@
 			await listarGastos(filtroAplicado, { i: sorterIndex, d: sorterReverse }, limit, offset)
 		).forEach((gasto) => {
 			resposta.push([
-				new Date(gasto.data).toLocaleDateString('pt-br'),
+				formatarData(gasto.data),
 				gasto.fornecedor,
 				gasto.empresa,
 				gasto.setor,
@@ -315,6 +316,21 @@
 				<input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.caixa} />
 			</div>
 		</div>
+		<div>
+			<h3>Geral</h3>
+			<div class="controls-holder">
+				<div class="input-holder">
+					<input type="text" bind:this={conteudoEl}
+					bind:value={valoresReais.conteudo[0]}
+					>
+				</div>
+				<input
+					type="checkbox"
+					on:change={selecionarFiltro}
+					bind:checked={valorToggle.conteudo}
+				/>
+			</div>
+		</div>
 		<button type="button" on:click={reset}>Remover Filtros</button>
 		<button type="button" on:click={carregarGastosComNovoFiltro}>Buscar</button>
 	</div>
@@ -326,42 +342,6 @@
 			calcularMaxRows={contarGastos}
 			bind:valorInferior={somatorioValor}
 		/>
-		<!-- <table>
-			<tr bind:this={tableHeaderEl}>
-				{#each titulos as titulo}
-					<th>
-						<button
-							class="sort-button"
-							on:click={() => {
-								headerButtonClick(titulo);
-							}}
-						>
-							{titulo}<span class="arrow">^</span>
-						</button>
-					</th>
-				{/each}
-			</tr>
-			{#each gastosFiltrados as gasto}
-				<tr>
-					<td>{new Date(gasto.data).toLocaleDateString('pt-br')}</td>
-					<td>{gasto.fornecedor}</td>
-					<td>{gasto.empresa}</td>
-					<td>{gasto.setor}</td>
-					<td>{formatarValor(gasto.valor)}</td>
-					<td>{gasto.pagamento}</td>
-					<td>{ formatarNF(gasto.nf)}</td>
-					<td>{gasto.caixa}</td>
-					<td>{gasto.obs}</td>
-				</tr>
-			{/each}
-			<tfoot>
-				<tr>
-					<td colspan="4">Soma</td>
-					<td>{formatarValor(somatorioValor)}</td>
-					<td colspan="4"></td>
-				</tr>
-			</tfoot>
-		</table> -->
 	</div>
 </main>
 
@@ -418,6 +398,11 @@
 	}
 	input[type='checkbox'] {
 		margin-left: 10px;
+	}
+	input[type='text'] {
+		width: 100%;
+		border: 2px solid black;
+		border-radius: var(--tema-border-radius);
 	}
 	.input-holder::after {
 		content: '';

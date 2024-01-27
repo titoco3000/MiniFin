@@ -432,11 +432,27 @@ impl BancoDeDados {
         let mut query = String::from("SELECT sum(valor) from Gastos");
         let condicoes = &self.filtro_into_query(filtro).await;
 
+        let mut joiner = "";
+        if let Some(c) = filtro.conteudo.get(0){
+            if !c.is_empty(){
+                joiner = "
+                LEFT JOIN Fornecedores ON Gastos.id_fornecedor = Fornecedores.id
+                LEFT JOIN Setores ON Gastos.id_setor = Setores.id 
+                LEFT JOIN Empresas ON Setores.id = Empresas.id
+                LEFT JOIN TiposDePagamento ON Gastos.id_tipo_pagamento = TiposDePagamento.id
+                LEFT JOIN CaixasDeEntrada ON Gastos.id_caixa = CaixasDeEntrada.id
+                ";
+            }
+        }
+
         if !condicoes.is_empty() {
+            query += joiner;
             query += " WHERE (";
             query += &condicoes;
             query += " )";
         }
+
+        println!("Somando de: {}",query);
 
         sqlx::query(
             &query
@@ -447,13 +463,14 @@ impl BancoDeDados {
     }
     pub async fn filtro_into_query(&mut self, filtro: &FiltroGasto)->String{
         
-        let mut data: Vec<(Option<SqlDateTime>, Option<SqlDateTime>)> = Vec::new();
-        let mut fornecedor: Vec<Fornecedor> = Vec::new();
-        let mut caixa: Vec<CaixaDeEntrada> = Vec::new();
-        let mut pagamento: Vec<TipoDePagamento> = Vec::new();
-        let mut setor: Vec<Setor> = Vec::new();
-        let mut empresa: Vec<Empresa> = Vec::new();
-        let mut pesquisa_obs: Vec<&str> = Vec::new();
+        let mut data: Vec<(Option<SqlDateTime>, Option<SqlDateTime>)> = Vec::with_capacity(1);
+        let mut fornecedor: Vec<Fornecedor> = Vec::with_capacity(1);
+        let mut caixa: Vec<CaixaDeEntrada> = Vec::with_capacity(1);
+        let mut pagamento: Vec<TipoDePagamento> = Vec::with_capacity(1);
+        let mut setor: Vec<Setor> = Vec::with_capacity(1);
+        let mut empresa: Vec<Empresa> = Vec::with_capacity(1);
+        let mut pesquisa_obs: Vec<&str> = Vec::with_capacity(1);
+        let mut conteudo: Vec<&str> = Vec::with_capacity(1);
 
         //data
         for i in 0usize..std::cmp::max(filtro.data_inicial.len(), filtro.data_final.len()) {
@@ -523,6 +540,13 @@ impl BancoDeDados {
             }
         }
 
+        //conteudo
+        for c in &filtro.conteudo {
+            if !c.is_empty() {
+                conteudo.push(c);
+            }
+        }
+
         [
             data.iter()
                 .map(|(inicio, fim)| {
@@ -585,13 +609,29 @@ impl BancoDeDados {
             .iter()
             .map(|x| format!("obs like '%{}%'",x))
             .collect::<Vec<String>>()
-            .join(" OR ")
+            .join(" OR "),
+            conteudo
+                .iter()
+                .map(|x| format!("
+                strftime('%d/%m/%Y', Gastos.data) like '%{}%' OR
+                Fornecedores.nome like '%{}%' OR
+                Setores.nome like '%{}%' OR
+                REPLACE(REPLACE(printf('%,d;%02d', Gastos.valor/100, Gastos.valor%100), ',','.'),';',',') like '%{}%' OR
+                Empresas.nome like '%{}%' OR
+                TiposDePagamento.nome like '%{}%' OR
+                Gastos.nf like '%{}%' OR
+                CaixasDeEntrada.nome like '%{}%' OR
+                Gastos.obs like '%{}%'
+                ", x,x,x,x,x,x,x,x,x))
+                .collect::<Vec<String>>()
+                .join(" OR "),
         ]
         .into_iter()
         .filter(|x| !x.is_empty())
         .collect::<Vec<String>>()
         .join(") AND (")
     }
+
     pub async fn listar_gastos_filtrados(
         &mut self,
         filtro: &FiltroGasto,
@@ -613,7 +653,7 @@ impl BancoDeDados {
 		'Caixa',
 		'Observações'
          */
-        let (joiner, order_by) = 
+        let (mut joiner, order_by) = 
         match sorter.i {
             0 => ("", "Gastos.data"),
             1 => ("JOIN Fornecedores ON Gastos.id_fornecedor = Fornecedores.id","Fornecedores.nome"),
@@ -627,6 +667,17 @@ impl BancoDeDados {
             _ => panic!("ordenamento não planejado")
         };
 
+        if let Some(c) = filtro.conteudo.get(0){
+            if !c.is_empty(){
+                joiner = "
+                LEFT JOIN Fornecedores ON Gastos.id_fornecedor = Fornecedores.id
+                LEFT JOIN Setores ON Gastos.id_setor = Setores.id 
+                LEFT JOIN Empresas ON Setores.id = Empresas.id
+                LEFT JOIN TiposDePagamento ON Gastos.id_tipo_pagamento = TiposDePagamento.id
+                LEFT JOIN CaixasDeEntrada ON Gastos.id_caixa = CaixasDeEntrada.id
+                ";
+            }
+        }
         query+=joiner;
 
         if !condicoes.is_empty() {

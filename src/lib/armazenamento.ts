@@ -81,6 +81,7 @@ export class FiltroGastos {
 	tipo_pagamento:string[] = [''];
 	caixa:string[] = [''];
 	obs_pesquisa:string[] = [''];
+	conteudo:string[] = [''];
 
 	equals(outro: FiltroGastos) {
 		return JSON.stringify(this) == JSON.stringify(outro);
