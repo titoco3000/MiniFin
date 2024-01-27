@@ -183,11 +183,16 @@ fn main() {
         }
     });
 
+    let eh_instalacao = db_mutex.lock().unwrap().is_some();
+
     tauri::Builder::default()
     .manage(db_mutex)
-    .setup(|app| {
+    .setup(move |app| {
         let window = app.get_window("main").unwrap();
         set_shadow(&window, true).expect("Unsupported platform!");
+        if eh_instalacao{
+            window.eval("window.location.replace('form');").expect("erro ao executar js");
+        }
         Ok(())
     })
     .invoke_handler(tauri::generate_handler![
