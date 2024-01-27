@@ -420,12 +420,34 @@ impl BancoDeDados {
         }
     }
     
-    pub async fn contar_gastos(&mut self)->u32{
+    pub async fn contar_gastos(&mut self, filtro: &FiltroGasto)->u32{
+        let mut query = String::from("SELECT COUNT(id) from Gastos");
+        let condicoes = &self.filtro_into_query(filtro).await;
+
+        let mut joiner = "";
+        if let Some(c) = filtro.conteudo.get(0){
+            if !c.is_empty(){
+                joiner = "
+                LEFT JOIN Fornecedores ON Gastos.id_fornecedor = Fornecedores.id
+                LEFT JOIN Setores ON Gastos.id_setor = Setores.id 
+                LEFT JOIN Empresas ON Setores.id = Empresas.id
+                LEFT JOIN TiposDePagamento ON Gastos.id_tipo_pagamento = TiposDePagamento.id
+                LEFT JOIN CaixasDeEntrada ON Gastos.id_caixa = CaixasDeEntrada.id
+                ";
+            }
+        }
+
+        if !condicoes.is_empty() {
+            query += joiner;
+            query += " WHERE (";
+            query += &condicoes;
+            query += " )";
+        }
         sqlx::query(
-            "SELECT COUNT(*) FROM Gastos"
+            &query
         )
         .fetch_one(&self.0)
-        .await.expect("Erro ao contar").get::<u32,usize>(0)
+        .await.expect("Erro ao somar").get::<u32,usize>(0)
     }
     
     pub async fn somar_gastos(&mut self, filtro: &FiltroGasto)->u32{

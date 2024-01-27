@@ -95,57 +95,6 @@ export async function listarGastos(filtro:FiltroGastos, sortParameter:{i:number,
 	console.log("Recebi; ",JSON.parse(v));
 	
 	return JSON.parse(v);
-	// let todos = [
-	// 	{
-	// 		valor: 123,
-	// 		nf: 4638,
-	// 		data: '2022-09-13',
-	// 		modificado: '2023-09-13',
-	// 		setor: 'manutenção',
-	// 		empresa: 'Hotel',
-	// 		pagamento: 'Cartão',
-	// 		caixa: 'Bradesco',
-	// 		fornecedor: 'Maria',
-	// 		obs: 'Muito a falar'
-	// 	},
-	// 	{
-	// 		valor: 22,
-	// 		nf: 223406,
-	// 		data: '2021-09-13',
-	// 		modificado: '2023-09-13',
-	// 		setor: 'manutenção',
-	// 		empresa: 'Restaurante',
-	// 		pagamento: 'Dinheiro',
-	// 		caixa: 'Santander',
-	// 		fornecedor: 'João',
-	// 		obs: ''
-	// 	}
-	// ];
-	// const repeat = (arr:any[], n:number) => [].concat(...Array(n).fill(arr));
-
-	// for (const key in filtro) {
-	// 	let value = (filtro as any)[key];
-	// 	if(value.h){
-	// 		todos = todos.filter((e)=>{
-	// 			return (e as any)[key] == value.v;
-	// 		});
-	// 	}
-	// }
-	// let gastos = repeat(todos, 50);
-
-	// //ordena de acordo com o sortParameter
-	// let parametro = sortParameter.v.toLowerCase();
-	// let sorter = (a: any, b: any) =>
-	// 	a[parametro].localeCompare(b[parametro], 'pt', { sensitivity: 'base' });
-	// if (parametro == 'data')
-	// 	sorter = (a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime();
-	// else if (parametro == 'nf' || parametro == 'valor') sorter = (a: any, b: any) => parseInt(a[parametro]) - parseInt(b[parametro]);
-	// else if (parametro.startsWith('obs')) {
-	// 	sorter = (a: any, b: any) => a.obs.localeCompare(b.obs, 'pt', { sensitivity: 'base' });
-	// }
-	// gastos.sort(sorter);
-	// if (sortParameter.d) gastos.reverse();
-	// return gastos;
 }
 export async function listarPagamentos(): Promise<TipoDePagamento[]> {
 	let v:string = await invoke('listar_tipos_pagamento');
@@ -166,8 +115,8 @@ export async function definirLocalDB(local:string) {
 	let v:string = await invoke('definir_local_bd',{local:local});
 	return JSON.parse(v);
 }
-export async function contarGastos():Promise<number> {
-	return await invoke('contar_gastos');
+export async function contarGastos(filtro:FiltroGastos):Promise<number> {
+	return await invoke('contar_gastos',{filtro:filtro});
 }
 export async function somarGastos(filtro:FiltroGastos):Promise<number> {
 	return await invoke('somar_gastos',{filtro:filtro});

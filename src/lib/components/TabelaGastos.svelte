@@ -136,6 +136,11 @@
 		}
 		algoModificado();
 	}
+
+	function contarRows(){
+		return contarGastos(filtroAplicado);
+	}
+
 	function formatarValor(v: number) {
 		let s: string = `${v}`;
 		while (s.length < 3) s = '0' + s;
@@ -339,7 +344,7 @@
 			bind:this={lazyTableEl}
 			{titulos}
 			{carregarValores}
-			calcularMaxRows={contarGastos}
+			calcularMaxRows={contarRows}
 			bind:valorInferior={somatorioValor}
 		/>
 	</div>

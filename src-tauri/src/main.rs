@@ -155,11 +155,11 @@ fn definir_local_bd(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, loc
 }
 
 #[tauri::command]
-fn contar_gastos(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> u32{
+fn contar_gastos(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,filtro: tipos::FiltroGasto) -> u32{
     executor::block_on(
         database
             .lock()
-            .unwrap().as_mut().unwrap().contar_gastos())
+            .unwrap().as_mut().unwrap().contar_gastos(&filtro))
 }
 #[tauri::command]
 fn somar_gastos(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,filtro: tipos::FiltroGasto) -> u32{
