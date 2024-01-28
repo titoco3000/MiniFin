@@ -357,8 +357,10 @@
                     />
                 </div>
             </div>
-            <button type="button" on:click={reset}>Remover Filtros</button>
-            <button type="button" on:click={carregarGastosComNovoFiltro}>Buscar</button>
+            <div id="buttons-holder">
+                <button type="button" on:click={reset}>Remover Filtros</button>
+                <button type="button" on:click={carregarGastosComNovoFiltro}>Buscar</button>
+            </div>
         </div>
         <div class="table-holder">
             <LazyTable
@@ -383,21 +385,15 @@
 		height: 100%;
 		padding: 10px 0 10px 10px;
 		overflow: hidden;
-	}
-
-
-
-    #content {
-		display: flex;
-		width: 100%;
-		height: 100%;
+        display: flex;
+        width: 100%;
 	}
 	.filtro {
-		flex: 1 0 250px;
+		flex: 1 0 180px;
 		border: 2px solid black;
 		background-color: var(--cor-tema-fraca);
-
-		overflow-y: scroll;
+		/* overflow-y: auto; */
+        overflow: visible;
 	}
 	.filtro h2 {
 		background-color: var(--cor-tema-forte);
@@ -415,10 +411,17 @@
 	.filtro > div {
 		display: flex;
 		flex-direction: column;
-		border-bottom: 4px solid white;
+		/* border-bottom: 4px solid white; */
 		width: 100%;
-		padding: 10px;
+        max-width: 180px;
+		padding: 5px;
 	}
+    #buttons-holder{
+        flex-direction: row;
+    }
+    #buttons-holder > button:first-child{
+        margin-right: 3px;
+    }
 	.controls-holder {
 		display: flex;
 		justify-content: space-between;
@@ -444,6 +447,7 @@
 		width: 100%;
 		border: 2px solid black;
 		border-radius: var(--tema-border-radius);
+        height: var(--tema-altura-input);
 	}
 	.input-holder::after {
 		content: '';
