@@ -8,6 +8,8 @@
 	import InputData from './InputData.svelte';
 	import ResultBox from '$lib/components/ResultBox.svelte';
 	import { enviarNovoGasto, type Gasto } from '$lib/armazenamento';
+	import FormularioConfirmacao from './FormularioConfirmacao.svelte';
+
 	let resultBoxEl: ResultBox;
 
 	let inputFornecedor: InputFornecedor;
@@ -19,44 +21,59 @@
 	let inputPagamento: InputTipoPagamento;
 	let inputObs: HTMLTextAreaElement;
 
+	let formConfirmacao: FormularioConfirmacao;
+
 	function formSubmit(evento: { preventDefault: () => void }) {
 		evento.preventDefault();
-		let gasto: Gasto = {
-			fornecedor: inputFornecedor.obterValor(),
-			nf: inputNF.obterValor(),
-			data: inputData.value,
-			modificado: '',
-			valor: inputValor.obterValor(),
-			empresa: inputSetor.obterValor()[0],
-			setor: inputSetor.obterValor()[1],
-			caixa: inputCaixa.obterValor()[0],
-			pagamento: inputPagamento.obterValor()[0],
-			obs: inputObs.value
-		};
-		console.log('enviando gasto');
+		formConfirmacao.pedirConfirmacao(
+			inputFornecedor.obterValor(),
+			inputNF.obterValor(),
+			inputData.obterValor(),
+			inputValor.obterValor(),
+			inputSetor.obterValor()[0],
+			inputSetor.obterValor()[1],
+			inputCaixa.obterValor()[0],
+			inputPagamento.obterValor()[0],
+			inputObs.value,
+			(resultado: boolean) => {
+				if (resultado) {
+					let gasto: Gasto = {
+						fornecedor: inputFornecedor.obterValor(),
+						nf: inputNF.obterValor(),
+						data: inputData.value,
+						modificado: '',
+						valor: inputValor.obterValor(),
+						empresa: inputSetor.obterValor()[0],
+						setor: inputSetor.obterValor()[1],
+						caixa: inputCaixa.obterValor()[0],
+						pagamento: inputPagamento.obterValor()[0],
+						obs: inputObs.value
+					};
+					console.log('enviando gasto');
 
-		enviarNovoGasto(gasto).then((resposta) => {
-			if (resposta.Err) {
-				let r = resposta.Err.join('\n');
-				console.log(r);
-				resultBoxEl.mensagem(r, 'ruim');
+					enviarNovoGasto(gasto).then((resposta) => {
+						if (resposta.Err) {
+							let r = resposta.Err.join('\n');
+							console.log(r);
+							resultBoxEl.mensagem(r, 'ruim');
+						}
+						if (resposta.Ok) {
+							resposta.Ok.unshift('Sucesso!');
+							let r = resposta.Ok.join('\n');
+							console.log(r);
+							resultBoxEl.mensagem(r, 'bom');
+
+							inputValor.reset();
+							inputData.reset();
+							inputNF.reset();
+							inputObs.value = '';
+						}
+						document.getElementById('result-box')?.scrollIntoView(false);
+						console.log('scrolling into');
+					});
+				}
 			}
-			if(resposta.Ok){
-				resposta.Ok.unshift("Sucesso!");
-				let r = resposta.Ok.join('\n');
-				console.log(r);
-				resultBoxEl.mensagem(r, 'bom');
-				
-				inputValor.reset();
-				inputData.reset();
-				inputNF.reset();
-				inputObs.value = '';
-				
-			}
-			document.getElementById("result-box")?.scrollIntoView({ behavior: "smooth" });
-			console.log('scrolling into');
-			
-		});
+		);
 	}
 </script>
 
@@ -80,9 +97,9 @@
 			</div>
 			<div class="small">
 				<!-- svelte-ignore a11y-label-has-associated-control -->
-				<label>Data</label> 
+				<label>Data</label>
 				<div>
-					<InputData bind:this = {inputData}/>
+					<InputData bind:this={inputData} />
 				</div>
 			</div>
 			<div class="small">
@@ -92,7 +109,7 @@
 					<InputValor bind:this={inputValor} />
 				</div>
 			</div>
-			
+
 			<div class="medium">
 				<!-- svelte-ignore a11y-label-has-associated-control -->
 				<label>Setor</label>
@@ -100,11 +117,11 @@
 					<InputSetor bind:this={inputSetor} />
 				</div>
 			</div>
-			
+
 			<div class="medium">
 				<!-- svelte-ignore a11y-label-has-associated-control -->
 				<label>Caixa de Entrada</label>
-				
+
 				<div>
 					<InputCaixa bind:this={inputCaixa} />
 				</div>
@@ -129,11 +146,15 @@
 	<div id="result-box">
 		<ResultBox bind:this={resultBoxEl} />
 	</div>
+	<FormularioConfirmacao bind:this={formConfirmacao} />
 </main>
 
 <style>
 	main {
 		width: 100%;
+		height: 100%;
+		position: relative;
+		overflow: auto;
 	}
 	form,
 	#result-box {
@@ -152,11 +173,12 @@
 		background-color: var(--cor-tema-fundo-2);
 		position: relative;
 		border-radius: 5px;
-		
+
 		/* padding: 10%; */
 		text-align: center;
 	}
-	form, input[type='submit']{
+	form,
+	input[type='submit'] {
 		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 	}
 	section {
@@ -167,8 +189,18 @@
 		width: 25%;
 		min-width: 90px;
 	}
+	@media screen and (max-width: 500px) {
+		.small {
+			width: 50%;
+		}
+	}
 	.medium {
 		width: 50%;
+	}
+	@media screen and (max-width: 320px) {
+		.small, .medium {
+			width: 100%;
+		}
 	}
 	.large {
 		width: 100%;
@@ -187,12 +219,12 @@
 		margin-top: 0px;
 		font-size: 16px;
 		text-align: left;
-		padding: 1%;
+		padding: 10px 1% ;
 	}
 	@media screen and (max-width: 400px) {
-		div{
-			padding: 1px;
-		} 
+		div {
+			padding: 10px 1px;
+		}
 	}
 
 	div > div {

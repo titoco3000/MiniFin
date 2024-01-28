@@ -51,7 +51,7 @@ body{
         --tema-altura-input:20px;
     }
 }
-button{
+button, input[type=submit]{
     cursor: pointer;
     user-select: none;
 }

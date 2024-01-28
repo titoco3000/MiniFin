@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	export let value = new Date().toISOString().split('T')[0];
+	export let valor = new Date().toISOString().split('T')[0];
 	export let onChange = () => {};
 	export let placeholder = new Date().toISOString().split('T')[0];
 
-	let valueVisivel = value;
+	let valueVisivel = valor;
 
 	export function reset() {
-		value = placeholder;
+		valor = placeholder;
 		atualizarVisivel();
+	}
+	export function obterValor(){
+		return valor;
 	}
 
 	function formatar(data: string) {
@@ -17,7 +20,7 @@
 		return partes[2] + '/' + partes[1] + '/' + partes[0];
 	}
 	function atualizarVisivel() {
-		valueVisivel = formatar(value);
+		valueVisivel = formatar(valor);
 	}
 
 	onMount(() => {
@@ -31,7 +34,7 @@
 		<input
 			type="date"
 			name="data"
-			bind:value
+			bind:value={valor}
 			on:change={() => {
 				atualizarVisivel();
 				onChange();
