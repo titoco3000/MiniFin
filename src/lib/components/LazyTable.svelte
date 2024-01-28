@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import arrow from '$lib/assets/arrow.svg';
 
-	export let titulos = ['a', 'b', 'c', 'd', 'e'];
+	export let titulos:string[] = [];
 	export let legendaInferior = 'Total';
 	export let valorInferior = '';
 	export let batchSize = 40;
@@ -55,11 +55,54 @@
 
 		for (const val of row) {
 			let td = document.createElement('td');
+			td.onmouseenter = mouseEnter;
+			td.onmouseleave = mouseLeave;
 			td.classList.value = tdBlueprint.classList.value;
 			td.innerText = val;
 			newEL.appendChild(td);
 		}
 		return newEL;
+	}
+
+	let timerToolTip:number;
+	let tooltipEl:HTMLElement;
+
+	function getAbsoluteOffsetLeft(el:HTMLElement) {
+  let offset = 0;
+  let currentElement:HTMLElement|null = el;
+
+  while (currentElement !== null) {
+    offset += currentElement.offsetLeft;
+    offset -= currentElement.scrollLeft;
+    currentElement = (currentElement.offsetParent as HTMLElement);
+  }
+
+  return offset;
+}
+
+	function mouseEnter(e:MouseEvent){
+		console.log('mouse enter');
+		timerToolTip = setTimeout(() => {
+			console.log('exibindo tooltip');
+			console.log(e.target);
+			
+			if(e.target){
+				let target = e.target as HTMLElement;
+				if(target.innerText!==""){
+					tooltipEl.innerText = target.innerText;
+									
+					tooltipEl.style.right = (window.innerWidth - getAbsoluteOffsetLeft(target) - target.getBoundingClientRect().width/2) + 'px';
+					tooltipEl.style.top = (8 + target.getBoundingClientRect().top + target.getBoundingClientRect().height) + 'px';		
+	
+					tooltipEl.style.opacity = '100%';
+				}
+			}
+		}, 2000);		
+	}
+	function mouseLeave(e:Event){
+		console.log('mouse leave');
+		clearTimeout(timerToolTip);
+		tooltipEl.style.opacity = '0';
 	}
 
 	function incluirNovosValoresNaTabela() {
@@ -155,13 +198,43 @@
 		</tfoot>
 	</table>
 </main>
+<p id="tooltip" bind:this={tooltipEl}>
 
+</p>
 <style>
+	#tooltip{
+		background-color: var(--cor-tema-fraca);
+		border: 2px solid black;
+		opacity: 0;
+		position: absolute;
+		top: 0;
+		margin: 0;
+		padding: 10px;
+		border-radius: var(--tema-border-radius);
+		border-top-right-radius: 3px;
+		transition: opacity 0.2s;
+		user-select: none;
+	}
+	#tooltip:hover{
+		opacity: 100%;
+	}
+	#tooltip::after{
+		position: absolute;
+		right: 2px;
+		top: -7px;
+		height: 10px;
+		width: 10px;
+		content: '';
+		transform: rotate(45deg);
+		background-color: var(--cor-tema-fraca);
+		border: 2px solid black;
+		border-width: 2px 0 0 2px;
+	}
 	main {
 		width: 100%;
 		height: 100%;
 		overflow-y: scroll;
-		overflow-x: hidden;
+		overflow-x: visible;
 		padding: 0;
 	}
 	table {
@@ -175,7 +248,7 @@
 	}
 	th,
 	td {
-		border: 1px solid black;
+		border: 1px solid rgb(138, 138, 138);
 		text-wrap: nowrap;
 		overflow: hidden;
 	}
@@ -217,5 +290,28 @@
 	}
 	thead th:first-child button > img {
 		display: inline;
+	}
+
+	/* Aqui já desisti de toda generalidade */
+	th:nth-child(1) {
+		width: 75px;
+	}
+	th:nth-child(3) {
+		width: 7%;
+	}
+	th:nth-child(5) {
+		width: 75px;
+	}
+	th:nth-child(6) {
+		width: 8%;
+	}
+	th:nth-child(7) {
+		width: 75px;
+	}
+	th:nth-child(8) {
+		width: 10%;
+	}
+	th:nth-child(9) {
+		width: 20%;
 	}
 </style>
