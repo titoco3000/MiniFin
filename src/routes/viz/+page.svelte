@@ -126,13 +126,13 @@
 		lazyTableEl.reset();
 	}
 	function setorModificado(v: string[]) {
-		if (filtroAtual.empresa.length > 0 && filtroAtual.empresa[0] != v[0]) {
+		if (filtroAtual.empresa.length > 0 && filtroAtual.empresa[0]!='' && filtroAtual.empresa[0] != v[0]) {
 			setTimeout(() => empresaToggleEl.click(), 1);
 		}
 		algoModificado();
 	}
 	function empresaModificada(v: string[]) {
-		if (filtroAtual.setor.length > 0 && filtroAtual.setor[0] != v[0]) {
+		if (filtroAtual.setor.length > 0 && filtroAtual.setor[0]!='' && filtroAtual.setor[0] != v[0]) {
 			setTimeout(() => setorToggleEl.click(), 1);
 		}
 		algoModificado();

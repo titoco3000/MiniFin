@@ -6,10 +6,10 @@ npm add -D @tauri-apps/api
 
 A fazer:
 - menu contextual
-- formulario de confirmação
-- estilo form
-- frontend filtro compra&setor
-- estilo tabela
+- formulario de confirmação - ok
+- estilo form - ok
+- frontend filtro compra&setor - ok
+- estilo tabela - ok
 - estilo ferramentas
 - edição de gasto
 - edição de fornecedor
