@@ -81,11 +81,7 @@
 }
 
 	function mouseEnter(e:MouseEvent){
-		console.log('mouse enter');
 		timerToolTip = setTimeout(() => {
-			console.log('exibindo tooltip');
-			console.log(e.target);
-			
 			if(e.target){
 				let target = e.target as HTMLElement;
 				if(target.innerText!==""){
@@ -97,10 +93,9 @@
 					tooltipEl.style.opacity = '100%';
 				}
 			}
-		}, 2000);		
+		}, 1000);		
 	}
 	function mouseLeave(e:Event){
-		console.log('mouse leave');
 		clearTimeout(timerToolTip);
 		tooltipEl.style.opacity = '0';
 	}

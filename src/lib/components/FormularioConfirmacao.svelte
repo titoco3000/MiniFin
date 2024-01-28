@@ -81,7 +81,7 @@
 		</div>
         <div>
 			<h2>Observações:</h2>
-			<p bind:this={displays[9]}></p>
+			<p bind:this={displays[8]}></p>
 		</div>
 		<div id="botoes">
 			<input type="submit" value="Cancelar" />

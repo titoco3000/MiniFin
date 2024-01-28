@@ -32,15 +32,15 @@
 			inputValor.obterValor(),
 			inputSetor.obterValor()[0],
 			inputSetor.obterValor()[1],
-			inputCaixa.obterValor()[0],
 			inputPagamento.obterValor()[0],
+			inputCaixa.obterValor()[0],
 			inputObs.value,
 			(resultado: boolean) => {
 				if (resultado) {
 					let gasto: Gasto = {
 						fornecedor: inputFornecedor.obterValor(),
 						nf: inputNF.obterValor(),
-						data: inputData.value,
+						data: inputData.obterValor(),
 						modificado: '',
 						valor: inputValor.obterValor(),
 						empresa: inputSetor.obterValor()[0],
@@ -49,7 +49,7 @@
 						pagamento: inputPagamento.obterValor()[0],
 						obs: inputObs.value
 					};
-					console.log('enviando gasto');
+					console.log('enviando gasto: ',gasto);
 
 					enviarNovoGasto(gasto).then((resposta) => {
 						if (resposta.Err) {
