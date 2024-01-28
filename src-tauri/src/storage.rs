@@ -602,7 +602,7 @@ impl BancoDeDados {
                 .join(" OR "),
             pagamento
                 .iter()
-                .map(|x| format!("idPagamento = {}", x.id))
+                .map(|x| format!("id_pagamento = {}", x.id))
                 .collect::<Vec<String>>()
                 .join(" OR "),
             if setor.is_empty() && empresa.is_empty() {
