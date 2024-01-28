@@ -165,7 +165,7 @@
 	}
 	.small {
 		width: 25%;
-		min-width: 150px;
+		min-width: 90px;
 	}
 	.medium {
 		width: 50%;
@@ -187,8 +187,14 @@
 		margin-top: 0px;
 		font-size: 16px;
 		text-align: left;
-		padding: 10px;
+		padding: 1%;
 	}
+	@media screen and (max-width: 400px) {
+		div{
+			padding: 1px;
+		} 
+	}
+
 	div > div {
 		padding: 0px;
 		box-sizing: border-box;
