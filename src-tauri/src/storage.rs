@@ -421,7 +421,7 @@ impl BancoDeDados {
     }
     
     pub async fn contar_gastos(&mut self, filtro: &FiltroGasto)->u32{
-        let mut query = String::from("SELECT COUNT(id) from Gastos");
+        let mut query = String::from("SELECT COUNT(*) from Gastos");
         let condicoes = &self.filtro_into_query(filtro).await;
 
         let mut joiner = "";
@@ -443,11 +443,13 @@ impl BancoDeDados {
             query += &condicoes;
             query += " )";
         }
+        println!("{}",&query);
+
         sqlx::query(
             &query
         )
         .fetch_one(&self.0)
-        .await.expect("Erro ao somar").get::<u32,usize>(0)
+        .await.expect("Erro ao contar").get::<u32,usize>(0)
     }
     
     pub async fn somar_gastos(&mut self, filtro: &FiltroGasto)->u32{

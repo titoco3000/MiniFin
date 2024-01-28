@@ -5,7 +5,6 @@ tive que instalar
 npm add -D @tauri-apps/api
 
 A fazer:
-- pesquisa bruta
 - menu contextual
 - formulario de confirmação
 - estilo form
