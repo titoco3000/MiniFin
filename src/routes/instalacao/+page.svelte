@@ -23,7 +23,7 @@
 			if (r.Ok !==undefined) {
 				importarCSVs(csvPaths[0], csvPaths[1]).then((r) => {
 					if (r.Ok !==undefined) {
-						window.location.replace("main");
+						window.location.replace("form");
 					} else {
 						console.log('Algo de errado ocorreu: ', r);
 						alert('Algo de errado ocorreu ao enviar CSVs');
