@@ -92,11 +92,11 @@
 
 <style>
 	main {
-		position: absolute;
-		top: 0;
+		position: fixed;
+		top: 30px;
 		left: 0;
-		width: 100%;
-		height: 100%;
+		bottom: 0;
+		right: 0;
 		background-color: rgba(0, 0, 0, 0.349);
 		align-items: center;
 		justify-content: center;
