@@ -27,6 +27,17 @@ pub fn obter_local_padrao() -> io::Result<PathBuf> {
     }
 }
 
+fn trim_whitespace(s: &str) -> String {
+    let mut new_str = s.trim().to_owned();
+    let mut prev = ' '; // The initial value doesn't really matter
+    new_str.retain(|ch| {
+        let result = ch != ' ' || prev != ' ';
+        prev = ch;
+        result
+    });
+    new_str
+}
+
 #[derive(Serialize)]
 pub struct Config {
     local_banco_de_dados: PathBuf,
@@ -523,6 +534,9 @@ impl BancoDeDados {
         for nome in &filtro.fornecedor {
             if let Some(valor) = self.obter_fornecedor(nome).await {
                 fornecedor.push(valor);
+            }
+            else {
+                println!("Fornecedor não reconhecido: {}",nome);
             }
         }
 
@@ -1218,31 +1232,32 @@ impl BancoDeDados {
         let fornecedores = std::fs::read_to_string(fornecedores_path).unwrap();
         let gastos = std::fs::read_to_string(gastos_path).unwrap();
 
-        let mut caixas: Vec<&str> = Vec::with_capacity(20);
-        let mut empresas: Vec<&str> = Vec::with_capacity(20);
-        let mut setores: Vec<(&str, &str)> = Vec::with_capacity(20);
-        let mut pagamentos: Vec<&str> = Vec::with_capacity(20);
+        let mut caixas: Vec<String> = Vec::with_capacity(20);
+        let mut empresas: Vec<String> = Vec::with_capacity(20);
+        let mut setores: Vec<(String, String)> = Vec::with_capacity(20);
+        let mut pagamentos: Vec<String> = Vec::with_capacity(20);
 
         for linha in fornecedores.split('\n') {
-            let record: Vec<&str> = linha.split(',').collect();
+            let record: Vec<String> = linha.split(',').map(trim_whitespace).collect();
             if record.len() == 4 {
-                let empresa_setor: Vec<&str> = record[1].split('_').collect();
+                let empresa_setor: Vec<String> = record[1].split('_').map(|v|{trim_whitespace(v)}).collect();
 
                 if !empresas.iter().find(|&x| x == &empresa_setor[0]).is_some() {
-                    empresas.push(empresa_setor[0]);
+                    empresas.push(empresa_setor[0].clone());
                 }
                 if !setores
                     .iter()
                     .find(|&x| x.0 == empresa_setor[1] && x.1 == empresa_setor[0])
                     .is_some()
                 {
-                    setores.push((empresa_setor[1], empresa_setor[0]));
+                    setores.push((empresa_setor[1].clone(), empresa_setor[0].clone()));
                 }
+
                 if !caixas.iter().find(|&x| x == &record[3]).is_some() {
-                    caixas.push(record[3]);
+                    caixas.push(record[3].clone());
                 }
                 if !pagamentos.iter().find(|&x| x == &record[2]).is_some() {
-                    pagamentos.push(record[2]);
+                    pagamentos.push(record[2].clone());
                 }
             } else {
                 println!("Não fez a linha: \"{}\"", linha);
@@ -1250,25 +1265,25 @@ impl BancoDeDados {
         }
 
         for linha in gastos.split('\n') {
-            let record: Vec<&str> = linha.split(',').collect();
+            let record: Vec<String> = linha.split(',').map(|v|{trim_whitespace(v)}).collect();
 
             if record.len() == 8 {
-                let empresa_setor: Vec<&str> = record[1].split('_').collect();
+                let empresa_setor: Vec<String> = record[1].split('_').map(|v|{trim_whitespace(v)}).collect();
                 if !empresas.iter().find(|&x| x == &empresa_setor[0]).is_some() {
-                    empresas.push(empresa_setor[0]);
+                    empresas.push(empresa_setor[0].clone());
                 }
                 if !setores
                     .iter()
                     .find(|&x| x.0 == empresa_setor[1] && x.1 == empresa_setor[0])
                     .is_some()
                 {
-                    setores.push((empresa_setor[1], empresa_setor[0]));
+                    setores.push((empresa_setor[1].clone(), empresa_setor[0].clone()));
                 }
                 if !caixas.iter().find(|&x| x == &record[6]).is_some() {
-                    caixas.push(record[6]);
+                    caixas.push(record[6].clone());
                 }
                 if !pagamentos.iter().find(|&x| x == &record[4]).is_some() {
-                    pagamentos.push(record[4]);
+                    pagamentos.push(record[4].clone());
                 }
             } else {
                 println!("Não fez a linha: \"{}\"", linha);
@@ -1280,22 +1295,26 @@ impl BancoDeDados {
             (&caixas, &empresas, &setores, &pagamentos)
         );
 
-        self.registrar_basicos(&caixas, &empresas, &setores, &pagamentos)
+        let c:(Vec<&str>,Vec<&str>,Vec<(&str,&str)>,Vec<&str>) = (caixas.iter().map(|s| &**s).collect(),
+        empresas.iter().map(|s| &**s).collect(),
+        setores.iter().map(|s| ((&s.0 as &str), (&s.1 as &str))).collect(),
+        pagamentos.iter().map(|s| &**s).collect());
+        self.registrar_basicos(&c.0,&c.1,&c.2,&c.3)
             .await;
 
         for linha in fornecedores.split('\n') {
-            let record: Vec<&str> = linha.split(',').collect();
+            let record: Vec<String> = linha.split(',').map(trim_whitespace).collect();
 
             if record.len() == 4 {
-                let empresa_setor: Vec<&str> = record[1].split('_').collect();
+                let empresa_setor: Vec<String> = record[1].split('_').map(trim_whitespace).collect();
 
                 let mut sucesso = false;
 
-                if let Some(setor) = self.obter_setor(empresa_setor[1], empresa_setor[0]).await {
-                    if let Some(pagamento) = self.obter_tipo_pagamento(record[2]).await {
-                        if let Some(caixa) = self.obter_caixa(record[3]).await {
+                if let Some(setor) = self.obter_setor(&empresa_setor[1], &empresa_setor[0]).await {
+                    if let Some(pagamento) = self.obter_tipo_pagamento(&record[2]).await {
+                        if let Some(caixa) = self.obter_caixa(&record[3]).await {
                             self.registrar_ou_atualizar_fornecedor(
-                                record[0], &setor, &pagamento, &caixa,
+                                &record[0], &setor, &pagamento, &caixa,
                             )
                             .await?;
                             sucesso = true;
@@ -1310,7 +1329,7 @@ impl BancoDeDados {
             }
         }
         for linha in gastos.split('\n') {
-            let record: Vec<&str> = linha.split(',').collect();
+            let record: Vec<String> = linha.split(',').map(trim_whitespace).collect();
             if record.len() == 8 {
                 let empresa_setor: Vec<&str> = record[1].split('_').collect();
 
@@ -1320,7 +1339,7 @@ impl BancoDeDados {
                 let nf = record[5]
                     .parse::<u32>()
                     .expect(&format!("Erro na nf {}", record[5]));
-                let mut data = SqlDateTime::parse_from_str(record[2], "%d/%m/%Y")
+                let mut data = SqlDateTime::parse_from_str(&record[2], "%d/%m/%Y")
                     .expect(&format!("Erro na data {}", record[2]));
                 //datas no CSV podem estar com só dois digitos pro ano
                 if data.year() < 2000 {
@@ -1336,17 +1355,17 @@ impl BancoDeDados {
                         (empresa_setor[1], empresa_setor[0])
                     ));
                 let caixa = self
-                    .obter_caixa(record[6])
+                    .obter_caixa(&record[6])
                     .await
                     .expect(&format!("Erro n caixa {}", record[6]));
                 let pagamento = self
-                    .obter_tipo_pagamento(record[4])
+                    .obter_tipo_pagamento(&record[4])
                     .await
                     .expect(&format!("Erro no pagamento {}", record[4]));
-                let fornecedor = match self.obter_fornecedor(record[0]).await {
+                let fornecedor = match self.obter_fornecedor(&record[0]).await {
                     Some(f) => f,
                     None => self
-                        .registrar_ou_atualizar_fornecedor(record[0], &setor, &pagamento, &caixa)
+                        .registrar_ou_atualizar_fornecedor(&record[0], &setor, &pagamento, &caixa)
                         .await
                         .expect(&format!(
                             "Erro ao registrar fornecedor desconhecido: {}",
