@@ -177,6 +177,14 @@ fn remover_gasto(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,fornece
             .unwrap().as_mut().unwrap().remover_gasto(nf,&fornecedor)).unwrap();
 }
 
+#[tauri::command]
+fn renomear_fornecedor(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,original:String, novo:String){
+    executor::block_on(
+        database
+            .lock()
+            .unwrap().as_mut().unwrap().renomear_fornecedor(&original,&novo));
+}
+
 
 fn main() {
     let db_mutex = Mutex::new( match storage::Config::ler() {
@@ -219,7 +227,8 @@ fn main() {
         definir_local_bd,
         contar_gastos,
         somar_gastos,
-        remover_gasto
+        remover_gasto,
+        renomear_fornecedor
     ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

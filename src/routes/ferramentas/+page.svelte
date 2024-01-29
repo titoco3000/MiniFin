@@ -1,6 +1,8 @@
 <script lang="ts">
     import TopHeader from "$lib/components/TopHeader.svelte";
     import ExclusorGasto from "$lib/components/ExclusorGasto.svelte";
+    import EditorFornecedor from "$lib/components/EditorFornecedor.svelte";
+
     let contentHolder:HTMLElement;
     let buttonsHolder:HTMLElement;
 
@@ -27,11 +29,13 @@
         </nav>
         <div id="container-ferramentas" bind:this={contentHolder}>
             <div>
-                <div id="holder-exclusor">
+                <div class="padded-holder">
                     <ExclusorGasto />
                 </div>
             </div>
-            <div></div>
+            <div>
+                <EditorFornecedor />
+            </div>
             <div></div>
         </div>
     </div>
@@ -53,6 +57,8 @@
     }
     #container-ferramentas > div{
         display: none;
+        width: 100%;
+        height: 100%;
     }
     nav{
         display: flex;
@@ -66,7 +72,7 @@
         border-radius: var(--tema-border-radius);
         margin: 10px;
     }
-    #holder-exclusor{
+    .padded-holder{
         padding: 20px;
     }
 </style>

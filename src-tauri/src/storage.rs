@@ -1526,6 +1526,26 @@ impl BancoDeDados {
         .await
         .unwrap();
     }
+
+    pub async fn renomear_fornecedor(&mut self, original: &str, novo:&str){
+        let original = self.obter_fornecedor(original).await.expect("Erro ao ler fornecedor");
+        if let Some(destino) = self.obter_fornecedor(novo).await{
+            self.remover_fornecedor(&original, &destino).await;
+        }
+        else {
+            sqlx::query(&format!(
+                "UPDATE Fornecedores SET 
+                        nome = '{}',
+                        modificado = date('now','localtime')
+                    WHERE id = {};
+                    ",
+                novo, original.id
+            ))
+            .execute(&self.0)
+            .await
+            .unwrap();
+        }
+    }
 }
 
 impl Drop for BancoDeDados {

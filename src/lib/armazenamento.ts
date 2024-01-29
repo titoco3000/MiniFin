@@ -125,3 +125,8 @@ export async function somarGastos(filtro:FiltroGastos):Promise<number> {
 export async function excluirGasto(fornecedor:string, nf:number) {
 	invoke('remover_gasto',{fornecedor:fornecedor,nf:nf});
 }
+
+export async function renomearFornecedor(original:string, novo:string) {
+	invoke('renomear_fornecedor',{original, novo});
+	
+}
