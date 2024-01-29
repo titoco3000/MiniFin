@@ -209,9 +209,7 @@
 		border-top-right-radius: 3px;
 		transition: opacity 0.2s;
 		user-select: none;
-	}
-	#tooltip:hover{
-		opacity: 100%;
+		pointer-events: none;
 	}
 	#tooltip::after{
 		position: absolute;
