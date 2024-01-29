@@ -10,6 +10,8 @@
 		inputEl.value = v;
 	}
 
+	export let onEdit = (v:number)=>{};
+
 	let digitos = 9;
 
 	let inputEl: HTMLInputElement;
@@ -47,6 +49,7 @@
 			inputEl.value = s;
 
 			inputEl.setSelectionRange(caretPos, caretPos);
+			onEdit(obterValor());
 		}
 	}
 

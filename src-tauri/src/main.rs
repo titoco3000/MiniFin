@@ -168,6 +168,16 @@ fn somar_gastos(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,filtro: 
             .lock()
             .unwrap().as_mut().unwrap().somar_gastos(&filtro))
 }
+
+#[tauri::command]
+fn remover_gasto(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,fornecedor:String,nf:u32){
+    executor::block_on(
+        database
+            .lock()
+            .unwrap().as_mut().unwrap().remover_gasto(nf,&fornecedor)).unwrap();
+}
+
+
 fn main() {
     let db_mutex = Mutex::new( match storage::Config::ler() {
         Ok(_config_file) => match executor::block_on(storage::BancoDeDados::abrir()) {
@@ -208,7 +218,8 @@ fn main() {
         checar_tipo_de_janela,
         definir_local_bd,
         contar_gastos,
-        somar_gastos
+        somar_gastos,
+        remover_gasto
     ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

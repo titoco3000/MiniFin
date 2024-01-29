@@ -1,6 +1,4 @@
 <script lang="ts">
-	import LazyTable from "./LazyTable.svelte";
-
     let contentHolder:HTMLElement;
     let buttonsHolder:HTMLElement;
 
@@ -20,14 +18,11 @@
 
 <main>
     <nav bind:this={buttonsHolder}>
-        <button on:click={()=>revelarFerramenta(0)}>Teste</button>
-        <button on:click={()=>revelarFerramenta(1)}>Editar gasto</button>
-        <button on:click={()=>revelarFerramenta(2)}>Editar fornecedor</button>
+        <button on:click={()=>revelarFerramenta(0)}>Editar gasto</button>
+        <button on:click={()=>revelarFerramenta(0)}>Editar fornecedor</button>
     </nav>
     <div class="content" bind:this={contentHolder}>
-        <div>
-            <LazyTable />
-        </div>
+        <div></div>
         <div></div>
         <div></div>
     </div>
@@ -38,6 +33,7 @@
         display: flex;
         width: 100%;
         height: 100%;
+        padding: 20px;
     }
     nav{
         background-color: var(--cor-tema-fundo-1);
