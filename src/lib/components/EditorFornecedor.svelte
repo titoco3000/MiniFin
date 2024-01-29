@@ -70,7 +70,6 @@
     main{
         height: 100%;
         width: 100%;
-        border: 2px dashed black;
         display: flex;
         padding: 20px;
         position: relative;
