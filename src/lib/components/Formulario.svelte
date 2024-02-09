@@ -162,7 +162,7 @@
 		width: 90%;
 		max-width: 900px;
 		margin: auto;
-		margin-top: var(--tema-altura-input);
+		margin-top: calc(var(--tema-altura-input) * 0.5);
 	}
 	#result-box {
 		padding: 0;
@@ -211,8 +211,8 @@
 		border: none;
 		border-radius: var(--tema-border-radius);
 		padding: 10px;
-		margin-top: 50px;
-		margin-bottom: 30px;
+		margin: 10px;
+		margin-bottom: 20px;
 	}
 	div {
 		box-sizing: border-box;
