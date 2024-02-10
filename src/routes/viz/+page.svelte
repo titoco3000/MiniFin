@@ -6,6 +6,7 @@
 	import InputEmpresa from '$lib/components/InputEmpresa.svelte';
 	import InputTipoPagamento from '$lib/components/InputTipoPagamento.svelte';
 	import InputData from '$lib/components/InputData.svelte';
+	import ScrollBox from '$lib/components/ScrollBox.svelte';
 	import {
 		listarGastos,
 		type Gasto,
@@ -63,7 +64,7 @@
 
 	function selecionarFiltro(e: any) {
 		algoModificado();
-		let el = e.srcElement.parentNode.querySelector('.input-holder');
+		let el = e.srcElement.parentNode.parentNode.querySelector('.input-holder');
 		if (e.currentTarget.checked) {
 			el.style.setProperty('--opacity', '0');
 			el.style.setProperty('--blur-amount', '0px');
@@ -194,147 +195,155 @@
 
 <main>
 	<TopHeader inicial={1} />
-	<section id="content">
+	<div id="content">
         <div class="filtro" bind:this={filtroEl}>
-            <h2>Filtros</h2>
-            <div>
-                <h3>Data inicial</h3>
-                <div class="controls-holder">
-                    <div class="input-holder">
-                        <InputData
-                            onChange={algoModificado}
-                            bind:valor={valoresReais.data_inicial[0]}
-                            bind:this={dataInicialEl}
-                            placeholder={dataInicial.toISOString().split('T')[0]}
-                        />
-                    </div>
-                    <input
-                        type="checkbox"
-                        on:change={selecionarFiltro}
-                        bind:checked={valorToggle.data_inicial}
-                    />
-                </div>
-            </div>
-            <div>
-                <h3>Data final</h3>
-                <div class="controls-holder">
-                    <div class="input-holder">
-                        <InputData
-                            onChange={algoModificado}
-                            bind:valor={valoresReais.data_final[0]}
-                            bind:this={dataFinalEl}
-                        />
-                    </div>
-                    <input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.data_final} />
-                </div>
-            </div>
-            <div>
-                <h3>Fornecedor</h3>
-                <div class="controls-holder">
-                    <div class="input-holder">
-                        <InputFornecedor
-                            onEdit={algoModificado}
-                            permitirNovo={false}
-                            bind:valor={valoresReais.fornecedor[0]}
-                            bind:this={fornecedorEl}
-                        />
-                    </div>
-                    <input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.fornecedor} />
-                </div>
-            </div>
-            <div>
-                <h3>Empresa</h3>
-                <div class="controls-holder">
-                    <div class="input-holder">
-                        <InputEmpresa
-                            onEdit={empresaModificada}
-                            bind:valor={valoresReais.empresa}
-                            bind:this={empresaEl}
-                        />
-                    </div>
-                    <input
-                        type="checkbox"
-                        on:change={(e) => {
-                            if (e.currentTarget.checked) {
-                                empresaModificada(valoresReais.empresa);
-                            }
-    
-                            selecionarFiltro(e);
-                        }}
-                        bind:checked={valorToggle.empresa}
-                        bind:this={empresaToggleEl}
-                    />
-                </div>
-            </div>
-            <div>
-                <h3>Setor</h3>
-                <div class="controls-holder">
-                    <div class="input-holder">
-                        <InputSetor
-                            onEdit={setorModificado}
-                            bind:valor={valoresReais.setor}
-                            bind:this={setorEl}
-                        />
-                    </div>
-                    <input
-                        type="checkbox"
-                        on:change={(e) => {
-                            if (e.currentTarget.checked) {
-                                setorModificado(valoresReais.setor);
-                            }
-                            selecionarFiltro(e);
-                        }}
-                        bind:checked={valorToggle.setor}
-                        bind:this={setorToggleEl}
-                    />
-                </div>
-            </div>
-            <div>
-                <h3>Tipo de pagamento</h3>
-                <div class="controls-holder">
-                    <div class="input-holder">
-                        <InputTipoPagamento
-                            onEdit={algoModificado}
-                            bind:valor={valoresReais.tipo_pagamento}
-                            bind:this={pagamentoEl}
-                        />
-                    </div>
-                    <input
-                        type="checkbox"
-                        on:change={selecionarFiltro}
-                        bind:checked={valorToggle.tipo_pagamento}
-                    />
-                </div>
-            </div>
-            <div>
-                <h3>Caixa de entrada</h3>
-                <div class="controls-holder">
-                    <div class="input-holder">
-                        <InputCaixa onEdit={algoModificado} bind:valor={valoresReais.caixa} bind:this={caixaEl} />
-                    </div>
-                    <input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.caixa} />
-                </div>
-            </div>
-            <div>
-                <h3>Geral</h3>
-                <div class="controls-holder">
-                    <div class="input-holder">
-                        <input type="text" bind:this={conteudoEl}
-                        bind:value={valoresReais.conteudo[0]}
-                        >
-                    </div>
-                    <input
-                        type="checkbox"
-                        on:change={selecionarFiltro}
-                        bind:this={togglePesquisaConteudo}
-                        bind:checked={valorToggle.conteudo}
-                    />
-                </div>
-            </div>
-            <div id="buttons-holder">
-                <button type="button" on:click={reset}>Remover Filtros</button>
-                <button type="button" on:click={carregarGastosComNovoFiltro}>Buscar</button>
-            </div>
+			<h2>Filtros</h2>
+			<div id="box-holder">
+			<ScrollBox>
+					<section>
+						<div class="controls-header">
+							<h3>Data inicial</h3>
+							<input
+							type="checkbox"
+							on:change={selecionarFiltro}
+							bind:checked={valorToggle.data_inicial}
+							/>
+						</div>
+						<div class="input-holder">
+							<InputData
+									onChange={algoModificado}
+									bind:valor={valoresReais.data_inicial[0]}
+									bind:this={dataInicialEl}
+									placeholder={dataInicial.toISOString().split('T')[0]}
+								/>
+						</div>
+					</section>
+					<section>
+						<div class="controls-header">
+							<h3>Data final</h3>
+							<input
+							type="checkbox"
+							on:change={selecionarFiltro}
+							bind:checked={valorToggle.data_final}
+							/>
+						</div>
+						<div class="input-holder">
+							<InputData
+									onChange={algoModificado}
+									bind:valor={valoresReais.data_final[0]}
+									bind:this={dataFinalEl}
+								/>
+						</div>
+					</section>
+					<section>
+						<div class="controls-header">
+							<h3>Fornecedor</h3>
+							<input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.fornecedor} />
+						</div>
+						<div class="input-holder">
+							<InputFornecedor
+								onEdit={algoModificado}
+								permitirNovo={false}
+								bind:valor={valoresReais.fornecedor[0]}
+								bind:this={fornecedorEl}
+							/>
+						</div>
+					</section>
+					<section>
+						<div class="controls-header">
+							<h3>Empresa</h3>
+							<input
+								type="checkbox"
+								on:change={(e) => {
+									if (e.currentTarget.checked) {
+										empresaModificada(valoresReais.empresa);
+									}
+			
+									selecionarFiltro(e);
+								}}
+								bind:checked={valorToggle.empresa}
+								bind:this={empresaToggleEl}
+							/>
+						</div>
+						<div class="input-holder">
+							<InputEmpresa
+									onEdit={empresaModificada}
+									bind:valor={valoresReais.empresa}
+									bind:this={empresaEl}
+								/>
+						</div>                    
+					</section>
+					<section>
+						<div class="controls-header">
+							<h3>Setor</h3>
+							<input
+								type="checkbox"
+								on:change={(e) => {
+									if (e.currentTarget.checked) {
+										setorModificado(valoresReais.setor);
+									}
+									selecionarFiltro(e);
+								}}
+								bind:checked={valorToggle.setor}
+								bind:this={setorToggleEl}
+							/>
+						</div>
+						<div class="input-holder">
+							<InputSetor
+								onEdit={setorModificado}
+								bind:valor={valoresReais.setor}
+								bind:this={setorEl}
+							/>
+						</div>
+					</section>
+					<section>
+						<div class="controls-header">
+							<h3>Tipo de pagamento</h3>
+							<input
+								type="checkbox"
+								on:change={selecionarFiltro}
+								bind:checked={valorToggle.tipo_pagamento}
+							/>
+						</div>
+						<div class="input-holder">
+							<InputTipoPagamento
+								onEdit={algoModificado}
+								bind:valor={valoresReais.tipo_pagamento}
+								bind:this={pagamentoEl}
+							/>
+						</div>
+					</section>
+					<section>
+						<div class="controls-header">
+							<h3>Caixa de entrada</h3>
+							<input type="checkbox" on:change={selecionarFiltro} bind:checked={valorToggle.caixa} />
+						</div>
+						<div class="input-holder">
+							<InputCaixa onEdit={algoModificado} bind:valor={valoresReais.caixa} bind:this={caixaEl} />
+						</div>
+					</section>
+					<section>
+						<div class="controls-header">
+							<h3>Geral</h3>
+							<input
+								type="checkbox"
+								on:change={selecionarFiltro}
+								bind:this={togglePesquisaConteudo}
+								bind:checked={valorToggle.conteudo}
+							/>
+						</div>
+						<div class="input-holder">
+							<input type="text" bind:this={conteudoEl}
+							bind:value={valoresReais.conteudo[0]}
+							>
+						</div>
+					</section>
+					<section id="buttons-holder">
+						<button type="button" on:click={reset}>Remover Filtros</button>
+						<button type="button" on:click={carregarGastosComNovoFiltro}>Buscar</button>
+					</section>	
+				</ScrollBox>
+			</div>
         </div>
         <div class="table-holder">
             <LazyTable
@@ -345,7 +354,7 @@
                 bind:valorInferior={somatorioValor}
             />
         </div>
-    </section>
+    </div>
 </main>
 
 <style>
@@ -363,11 +372,12 @@
         width: 100%;
 	}
 	.filtro {
-		flex: 1 0 180px;
+		flex: 1 0 160px;
 		border: 2px solid black;
 		background-color: var(--cor-tema-fraca);
-		/* overflow-y: auto; */
         overflow: visible;
+		display: flex;
+		flex-direction: column;
 	}
 	.filtro h2 {
 		background-color: var(--cor-tema-forte);
@@ -376,31 +386,77 @@
 		font-weight: 100;
 		font-size: 22px;
 	}
+	#box-holder{
+		width: 100%;
+		overflow: visible;
+		flex-grow: 1;
+	}
 	.filtro h3 {
 		margin: 0;
 		flex-grow: 1;
 		width: 100%;
-		font-weight: 500;
+		font-weight: 600;
+		font-size: 13.5px;
 	}
-	.filtro > div {
-		display: flex;
-		flex-direction: column;
-		/* border-bottom: 4px solid white; */
+	section {
 		width: 100%;
-        max-width: 180px;
-		padding: 5px;
+        max-width: 156px;
+		padding: 0 5px;
+		pointer-events: all;
+		margin: calc(calc(100vh - 200px) / 50) 0;
 	}
     #buttons-holder{
         flex-direction: row;
+		padding: 0 7px;
     }
     #buttons-holder > button:first-child{
-        margin-right: 3px;
+		margin-bottom: 6px;
     }
-	.controls-holder {
+
+
+
+
+
+	.controls-header{
 		display: flex;
-		justify-content: space-between;
-		width: 100%;
+		align-items: center;
+		margin: 1px 0;
 	}
+	input[type='checkbox'] {
+		min-width: 18px;
+		min-height: 18px;
+		position: relative;
+		margin: 0;
+	}
+	input[type='checkbox']::before{
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		content: '';
+		background-color: white;
+		border: 2px solid black;
+	}
+	input[type='checkbox']::after{
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		content: '';
+		background-color: var(--cor-tema-fundo-1);
+		border-radius: 10%;
+		margin: 100%;
+		transition: margin .3s;
+	}
+	input[type='checkbox']:checked::after{
+		margin: 3px;
+	}
+
+
+
+
 	.input-holder {
 		flex-grow: 1;
 		flex-shrink: 1;
@@ -413,9 +469,6 @@
 		--blur-amount: 1px;
 		--opacity: 0.5;
 		--pointer-events: all;
-	}
-	input[type='checkbox'] {
-		margin-left: 10px;
 	}
 	input[type='text'] {
 		width: 100%;
@@ -434,6 +487,7 @@
 		border-radius: var(--tema-border-radius);
 		/* slightly transparent fallback */
 		background-color: rgba(255, 255, 255, 0.9);
+		transition: background-color 0.3s, backdrop-filter 0.3s, -webkit-backdrop-filter 0.3s;
 	}
 
 	/* if backdrop support: very transparent and blurred */
