@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import arrow from '$lib/assets/arrow.svg';
 
-	export let titulos:string[] = [];
+	export let titulos: string[] = [];
 	export let legendaInferior = 'Total';
 	export let valorInferior = '';
 	export let batchSize = 40;
@@ -24,7 +24,7 @@
 
 	export function reset() {
 		console.log('reset table');
-		
+
 		calcularMaxRows().then((v) => {
 			maxRows = v;
 		});
@@ -32,7 +32,7 @@
 		offset = 0;
 		tbodyEl.replaceChildren();
 		incluirNovosValoresNaTabela();
-		firstVisibleIndex = sorterReverse? maxRows: Math.min(1, tbodyEl.childElementCount);
+		firstVisibleIndex = sorterReverse ? maxRows : Math.min(1, tbodyEl.childElementCount);
 	}
 
 	let tableHeaderEl: HTMLTableRowElement;
@@ -64,38 +64,43 @@
 		return newEL;
 	}
 
-	let timerToolTip:number;
-	let tooltipEl:HTMLElement;
+	let timerToolTip: number;
+	let tooltipEl: HTMLElement;
 
-	function getAbsoluteOffsetLeft(el:HTMLElement) {
-  let offset = 0;
-  let currentElement:HTMLElement|null = el;
+	function getAbsoluteOffsetLeft(el: HTMLElement) {
+		let offset = 0;
+		let currentElement: HTMLElement | null = el;
 
-  while (currentElement !== null) {
-    offset += currentElement.offsetLeft;
-    offset -= currentElement.scrollLeft;
-    currentElement = (currentElement.offsetParent as HTMLElement);
-  }
+		while (currentElement !== null) {
+			offset += currentElement.offsetLeft;
+			offset -= currentElement.scrollLeft;
+			currentElement = currentElement.offsetParent as HTMLElement;
+		}
 
-  return offset;
-}
+		return offset;
+	}
 
-	function mouseEnter(e:MouseEvent){
+	function mouseEnter(e: MouseEvent) {
 		timerToolTip = setTimeout(() => {
-			if(e.target){
+			if (e.target) {
 				let target = e.target as HTMLElement;
-				if(target.innerText!==""){
+				if (target.innerText !== '') {
 					tooltipEl.innerText = target.innerText;
-									
-					tooltipEl.style.right = (window.innerWidth - getAbsoluteOffsetLeft(target) - target.getBoundingClientRect().width/2) + 'px';
-					tooltipEl.style.top = (8 + target.getBoundingClientRect().top + target.getBoundingClientRect().height) + 'px';		
-	
+
+					tooltipEl.style.right =
+						window.innerWidth -
+						getAbsoluteOffsetLeft(target) -
+						target.getBoundingClientRect().width / 2 +
+						'px';
+					tooltipEl.style.top =
+						8 + target.getBoundingClientRect().top + target.getBoundingClientRect().height + 'px';
+
 					tooltipEl.style.opacity = '100%';
 				}
 			}
-		}, 1000);		
+		}, 1000);
 	}
-	function mouseLeave(e:Event){
+	function mouseLeave(e: Event) {
 		clearTimeout(timerToolTip);
 		tooltipEl.style.opacity = '0';
 	}
@@ -106,9 +111,8 @@
 				tbodyEl.appendChild(rowToElement(row));
 			});
 			offset += a.length;
-            
-            if(firstVisibleIndex ==0)
-                firstVisibleIndex = 1;
+
+			if (firstVisibleIndex == 0) firstVisibleIndex = 1;
 		});
 	}
 
@@ -126,12 +130,12 @@
 			//caso queira mostrar o primeiro
 			//  firstVisibleIndex = Math.ceil(mainEl.scrollTop / tbodyEl.children[0].getBoundingClientRect().height);
 			//caso queira mostrar do primeiro ao ultimo
-			
+
 			firstVisibleIndex = Math.max(
 				Math.min(1, tbodyEl.childElementCount),
-				sorterReverse?
-				maxRows- Math.round(valorScroll * offset):
-				Math.round(valorScroll * offset)
+				sorterReverse
+					? maxRows - Math.round(valorScroll * offset)
+					: Math.round(valorScroll * offset)
 			);
 			if (isNaN(firstVisibleIndex)) firstVisibleIndex = 1;
 		}
@@ -152,7 +156,6 @@
 		sorterIndex = index;
 		reset();
 	}
-
 
 	onMount(() => {
 		tdBlueprint.style.display = 'none';
@@ -184,8 +187,11 @@
 		<tbody bind:this={tbodyEl}> </tbody>
 		<tfoot>
 			<tr>
-				<td colspan={(titulos.length-2)-Math.floor((titulos.length-2)/2)} style="text-align: right;">{legendaInferior}</td>
-				<td colspan={Math.floor((titulos.length-2)/2)}>{valorInferior}</td>
+				<td
+					colspan={titulos.length - 2 - Math.floor((titulos.length - 2) / 2)}
+					style="text-align: right;">{legendaInferior}</td
+				>
+				<td colspan={Math.floor((titulos.length - 2) / 2)}>{valorInferior}</td>
 				<td colspan="2" style="text-align: right;">
 					{firstVisibleIndex}/{maxRows}
 				</td>
@@ -193,11 +199,10 @@
 		</tfoot>
 	</table>
 </main>
-<p id="tooltip" bind:this={tooltipEl}>
+<p id="tooltip" bind:this={tooltipEl}></p>
 
-</p>
 <style>
-	#tooltip{
+	#tooltip {
 		background-color: var(--cor-tema-fraca);
 		border: 2px solid black;
 		opacity: 0;
@@ -211,7 +216,7 @@
 		user-select: none;
 		pointer-events: none;
 	}
-	#tooltip::after{
+	#tooltip::after {
 		position: absolute;
 		right: 2px;
 		top: -7px;
@@ -244,6 +249,12 @@
 		border: 1px solid rgb(138, 138, 138);
 		text-wrap: nowrap;
 		overflow: hidden;
+	}
+	@supports (not (text-wrap: nowrap)) {
+		th,
+		td {
+			white-space: nowrap;
+		}
 	}
 	th {
 		position: sticky;

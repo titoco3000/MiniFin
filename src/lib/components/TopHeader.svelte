@@ -107,6 +107,12 @@
 		justify-content: center;
 		background-color: var(--cor-principal);
 	}
+	/* Se é firefox, gambiarra. -moz não funcionou */
+	@supports (not (text-wrap: nowrap)) {
+		#tabs > * span {
+			font-size: 11px;
+	    }
+	}
 
 	#tabs .logo-holder {
 		width: 10px;
