@@ -111,8 +111,8 @@ fn checar_tipo_de_janela(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>
 fn definir_local_bd(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, local: &str) -> String {
     println!("definir_local_bd");
     let mut local = PathBuf::from(local);
-    local.push("raja");
-    local.push("raja.db");
+    local.push("minifin");
+    local.push("minifin.db");
     serde_json::to_string(&match storage::Config::new(local.clone()).salvar() {
          Ok(_) => {
             let db:Option<BancoDeDados> = match executor::block_on(storage::BancoDeDados::abrir()) {

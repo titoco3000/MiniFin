@@ -7,7 +7,7 @@
     "distDir": "../build"
   },
   "package": {
-    "productName": "raja",
+    "productName": "minifin",
     "version": "0.1.0"
   },
   "tauri": {
@@ -54,7 +54,7 @@
     },
     "bundle": {
       "active": true,
-      "category": "DeveloperTool",
+      "category": "Business",
       "copyright": "",
       "deb": {
         "depends": []
@@ -67,8 +67,8 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
-      "longDescription": "",
+      "identifier": "com.minifin",
+      "longDescription": "Programa financeiro para pequenas empresas",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -96,7 +96,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "raja",
+        "title": "minifin",
         "width": 800,
         "decorations": false
       }

@@ -1,11 +1,11 @@
 [package]
-name = "app"
+name = "minifin"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Programa financeiro para pequenas empresas"
+authors = ["Tito Guidotti"]
 license = ""
-repository = ""
-default-run = "app"
+repository = "https://github.com/titoco3000/MiniFin.git"
+default-run = "minifin"
 edition = "2021"
 rust-version = "1.60"
 

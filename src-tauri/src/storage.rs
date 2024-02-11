@@ -17,7 +17,7 @@ use std::path::PathBuf;
 //nao deve ser pub
 pub fn obter_local_padrao() -> io::Result<PathBuf> {
     if let Some(mut local) = dirs_2::config_dir() {
-        local.push("raja.toml");
+        local.push("minifin.toml");
         Ok(local)
     } else {
         io::Result::Err(io::Error::new(
@@ -60,7 +60,7 @@ impl Config {
         }
         io::Result::Err(io::Error::new(
             io::ErrorKind::NotFound,
-            "campo \"local_banco_de_dados\" faltando ou mal-formatado em raja.toml",
+            "campo \"local_banco_de_dados\" faltando ou mal-formatado em minifin.toml",
         ))
     }
     pub fn salvar(&self) -> io::Result<()> {
@@ -81,7 +81,7 @@ pub async fn criar_database(
         .await
         .unwrap_or(false)
     {
-        //garante que a pasta /raja/ exista
+        //garante que a pasta /minifin/ exista
         let mut folder = local_banco_de_dados.clone();
         folder.pop();
         std::fs::create_dir_all(folder)?;

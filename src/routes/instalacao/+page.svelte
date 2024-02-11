@@ -42,8 +42,8 @@
 <main>
 	<div id="content">
 		<div id="intro">
-			<h1>Raja</h1>
-			<p>Bem vindo a <em>Raja</em>, o sistema de gestão financeira para múltiplas empresas!</p>
+			<h1>MiniFin</h1>
+			<p>Bem vindo a <em>MiniFin</em>, o sistema de gestão financeira para múltiplas empresas!</p>
 			<p>
 				Se você está vendo essa página, é porque é a primeira vez abrindo esse programa, nesse caso
 				vá para <em>Configuração inicial</em>. Ou, se você já tem dados mas aconteceu algum problema
@@ -68,7 +68,7 @@
 				<p>Primeiro, escolha onde deverão ser salvos os dados:</p>
 				<FileChooser pastas={true} bind:value={pastaDB} />
 			</label>
-			<p>(Será criada uma pasta <em>/raja</em> no local selecionado)</p>
+			<p>(Será criada uma pasta <em>/minifin</em> no local selecionado)</p>
 
 			<p>Selecione os arquivos para serem importados:</p>
 			<div class="CSV-choosers">
