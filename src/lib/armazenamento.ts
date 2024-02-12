@@ -134,3 +134,7 @@ export async function renomearFornecedor(original:string, novo:string) {
 export async function extrairDadosTerminal():Promise<string[][]> {
 	return await invoke('extrair_dados_terminal');
 }
+
+export async function exportarParaXlsx(filtro:FiltroGastos,sortParameter:{i:number, d:boolean}) {
+	return await invoke('exportar_para_xlsx',{filtro:filtro, sorter:sortParameter});
+}

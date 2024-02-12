@@ -1,6 +1,5 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 use tauri::Manager;
 
 pub mod storage;
@@ -10,7 +9,11 @@ pub mod custom_console;
 
 use custom_console::macros::{self as console, extract};
 use futures::executor;
-use std::{path::PathBuf, sync::Mutex};
+use std::{
+    path::PathBuf,
+    str::FromStr,
+    sync::Mutex,
+};
 use storage::BancoDeDados;
 use tipos::SortParameter;
 
@@ -247,12 +250,213 @@ fn renomear_fornecedor(
 #[tauri::command]
 async fn extrair_dados_terminal() -> Vec<(String, String)> {
     use custom_console::buffer_queue::LogMessage::*;
-    extract!().iter().map(|d| match d {
-        Regular(m) => (m.clone(), "Regular".to_owned()),
-        Good(m) => (m.clone(), "Good".to_owned()),
-        Alert(m) => (m.clone(), "Alert".to_owned()),
-        Bad(m) => (m.clone(), "Bad".to_owned())
-    }).collect()
+    extract!()
+        .iter()
+        .map(|d| match d {
+            Regular(m) => (m.clone(), "Regular".to_owned()),
+            Good(m) => (m.clone(), "Good".to_owned()),
+            Alert(m) => (m.clone(), "Alert".to_owned()),
+            Bad(m) => (m.clone(), "Bad".to_owned()),
+        })
+        .collect()
+}
+
+fn trim_first_and_last(mut s: String) -> String {
+    s.pop(); // remove last
+    if s.len() > 0 {
+        s.remove(0); // remove first
+    }
+    s
+}
+fn substr(s: &str, begin: usize, end: Option<usize>) -> Option<&str> {
+    use std::iter::once;
+    let mut itr = s.char_indices().map(|(n, _)| n).chain(once(s.len()));
+    let begin_byte = itr.nth(begin)?;
+    let end_byte = match end {
+        Some(end) if begin >= end => begin_byte,
+        Some(end) => itr.nth(end - begin - 1)?,
+        None => s.len(),
+    };
+    Some(&s[begin_byte..end_byte])
+}
+async fn save_sheet(mut workbook: rust_xlsxwriter::Workbook, mut path: PathBuf) {
+    use regex::Regex;
+    let has_trailing_number = Regex::new(r".*\(\d*\)\.xlsx$").unwrap();
+    let mut tentativa = 0;
+    loop {
+        match workbook.save(&path) {
+            Ok(_) => {
+                match open::that(&path) {
+                    Ok(_) => {
+                        break;
+                    }
+                    Err(e) => {
+                        println!("Erro: {}", e);
+                    }
+                }
+            },
+            Err(_) => {},
+        };
+        let path_string = &path.display().to_string();
+        if has_trailing_number.is_match(&path_string) {
+            let before = substr(
+                substr(&path_string, 0, Some(path_string.rfind(')').unwrap())).unwrap(),
+                0,
+                Some(path_string.rfind('(').unwrap())
+            )
+            .unwrap();
+            path = PathBuf::from_str(&format!("{}({}).xlsx", before, tentativa)).unwrap();
+        }
+        else{
+            let mut filename = path.with_extension("").file_name().unwrap().to_owned();
+            filename.push(std::ffi::OsStr::new("(1).xlsx"));
+            path.pop();
+            path.push(filename);
+        }
+        tentativa+=1;
+    }
+}
+
+#[tauri::command]
+fn exportar_para_xlsx(
+    database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
+    filtro: tipos::FiltroGasto,
+    sorter: SortParameter,
+) -> Result<(), String> {
+    use rust_xlsxwriter::*;
+
+    let mut workbook = Workbook::new();
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    let formatacao_header = Format::new()
+        .set_bold()
+        .set_border(FormatBorder::Thin)
+        .set_align(FormatAlign::Center)
+        .set_background_color("#ffeeb2");
+    let formatacao_corpo = Format::new().set_border(FormatBorder::Thin);
+    let formatacao_nf = formatacao_corpo.clone().set_num_format("000000000");
+    let formatacao_valor = formatacao_corpo.clone().set_num_format("#,##0.00");
+    let formatacao_data = formatacao_corpo.clone().set_num_format("dd/mm/yyyy");
+
+    // Set the column width for clarity.
+    for (i, (title, width)) in [
+        ("Data", 12),
+        ("Fornecedor", 20),
+        ("Empresa", 17),
+        ("Setor", 18),
+        ("Valor", 12),
+        ("NF", 15),
+        ("Caixa", 17),
+        ("Observações", 50),
+    ]
+    .iter()
+    .enumerate()
+    {
+        worksheet
+            .set_column_width(i.try_into().unwrap(), *width)
+            .unwrap();
+        worksheet
+            .write_with_format(0, i.try_into().unwrap(), *title, &formatacao_header)
+            .unwrap();
+    }
+
+    let lista = executor::block_on(
+        database
+            .lock()
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .listar_gastos_filtrados_descompactados(&filtro, None, None, &sorter),
+    );
+    let tamanho = lista.len() as u32;
+    for (i, linha) in lista.iter().enumerate() {
+        worksheet
+            .write_with_format(
+                i as u32 + 1,
+                0,
+                ExcelDateTime::parse_from_str(&trim_first_and_last(linha["data"].to_string()))
+                    .unwrap(),
+                &formatacao_data,
+            )
+            .unwrap();
+        worksheet
+            .write_with_format(
+                i as u32 + 1,
+                1,
+                trim_first_and_last(linha["fornecedor"].to_string()),
+                &formatacao_corpo,
+            )
+            .unwrap();
+        worksheet
+            .write_with_format(
+                i as u32 + 1,
+                2,
+                trim_first_and_last(linha["empresa"].to_string()),
+                &formatacao_corpo,
+            )
+            .unwrap();
+        worksheet
+            .write_with_format(
+                i as u32 + 1,
+                3,
+                trim_first_and_last(linha["setor"].to_string()),
+                &formatacao_corpo,
+            )
+            .unwrap();
+        worksheet
+            .write_with_format(
+                i as u32 + 1,
+                4,
+                linha["valor"].to_string().parse::<f64>().unwrap() / 100.0,
+                &formatacao_valor,
+            )
+            .unwrap();
+        worksheet
+            .write_with_format(
+                i as u32 + 1,
+                5,
+                linha["nf"].to_string().parse::<u32>().unwrap(),
+                &formatacao_nf,
+            )
+            .unwrap();
+        worksheet
+            .write_with_format(
+                i as u32 + 1,
+                6,
+                trim_first_and_last(linha["caixa"].to_string()),
+                &formatacao_corpo,
+            )
+            .unwrap();
+        worksheet
+            .write_with_format(
+                i as u32 + 1,
+                7,
+                trim_first_and_last(linha["obs"].to_string()),
+                &formatacao_corpo,
+            )
+            .unwrap();
+    }
+    
+    //coloca footer
+    worksheet.write_with_format(tamanho+1, 0, "", &formatacao_header).unwrap();
+    worksheet.write_with_format(tamanho+1, 1, "", &formatacao_header).unwrap();
+    worksheet.write_with_format(tamanho+1, 2, "", &formatacao_header).unwrap();
+    worksheet.write_with_format(tamanho+1, 3, "Total", &formatacao_header).unwrap();
+    //worksheet.write_with_format(tamanho+1, 4, valor_total, &&formatacao_valor.clone().set_background_color("#ffeeb2")).unwrap();
+    worksheet.write_formula_with_format(tamanho+1, 4, &format!("=SUM(E1:E{})",tamanho+1) as &str , &&formatacao_valor.clone().set_background_color("#ffeeb2")).unwrap();
+    worksheet.write_with_format(tamanho+1, 5, "", &formatacao_header).unwrap();
+    worksheet.write_with_format(tamanho+1, 6, "", &formatacao_header).unwrap();
+    worksheet.write_with_format(tamanho+1, 7, "", &formatacao_header).unwrap();
+
+
+    
+    let pool = futures::executor::ThreadPool::new().expect("Failed to build pool");
+    let mut path = dirs_2::download_dir().unwrap();
+    path.push("relatorio.xlsx");
+    pool.spawn_ok(save_sheet(workbook, path));
+    
+    Ok(())
 }
 
 fn main() {
@@ -303,7 +507,8 @@ fn main() {
             somar_gastos,
             remover_gasto,
             renomear_fornecedor,
-            extrair_dados_terminal
+            extrair_dados_terminal,
+            exportar_para_xlsx
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

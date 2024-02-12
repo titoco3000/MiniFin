@@ -9,10 +9,10 @@
 	import ScrollBox from '$lib/components/ScrollBox.svelte';
 	import {
 		listarGastos,
-		type Gasto,
 		FiltroGastos as Filtro,
 		contarGastos,
-		somarGastos
+		somarGastos,
+		exportarParaXlsx
 	} from '$lib/armazenamento';
 	import { onMount } from 'svelte';
 	import { formatarValor, formatarNF, formatarData } from '$lib/utils';
@@ -117,8 +117,6 @@
 	}
 
 	function carregarGastosComNovoFiltro() {
-		console.log('carregarGastosComNovoFiltro');
-
 		//copia filtro
 		filtroAplicado = Object.assign(new Filtro(), JSON.parse(JSON.stringify(filtroAtual)));
 		somarGastos(filtroAplicado).then((v) => {
@@ -150,6 +148,7 @@
 		sorterReverse: boolean
 	): Promise<string[][]> {
 		let resposta: string[][] = [];
+		exportarParaXlsx(filtroAplicado,{ i: sorterIndex, d: sorterReverse });
 		(
 			await listarGastos(filtroAplicado, { i: sorterIndex, d: sorterReverse }, limit, offset)
 		).forEach((gasto) => {
