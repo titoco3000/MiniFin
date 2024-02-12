@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import FileChooser from '$lib/components/FileChooser.svelte';
+	import Console from '$lib/components/Console.svelte';
+	import TopHeader from '$lib/components/TopHeader.svelte';
 	import { importarCSVs, definirLocalDB } from '$lib/armazenamento';
-
+	
 	let navEl: HTMLElement;
 	let modosHolderEl: HTMLElement;
+	let consoleCSV:HTMLElement;
+
 	let pastaDB: string;
 
 	let csvPaths = ['', ''];
@@ -16,6 +20,7 @@
 	}
 
 	function enviarFormCSVs() {
+		ativarConsole(consoleCSV);
 		definirLocalDB(pastaDB).then((r:any) => {
 			console.log("r:",r);
 			console.log(r.Ok===undefined,r.Err===undefined);
@@ -23,7 +28,7 @@
 			if (r.Ok !==undefined) {
 				importarCSVs(csvPaths[0], csvPaths[1]).then((r) => {
 					if (r.Ok !==undefined) {
-						window.location.replace("main");
+						window.location.replace("form");
 					} else {
 						console.log('Algo de errado ocorreu: ', r);
 						alert('Algo de errado ocorreu ao enviar CSVs');
@@ -36,10 +41,15 @@
 		});
 	}
 
+	function ativarConsole(c:HTMLElement){
+		c.style.display = "flex";
+	}
+
 	onMount(() => {});
 </script>
 
 <main>
+	<TopHeader options={[]}/>
 	<div id="content">
 		<div id="intro">
 			<h1>MiniFin</h1>
@@ -82,11 +92,34 @@
 			{#if csvPaths[0] != '' && csvPaths[1] != '' && pastaDB != ''}
 				<input type="submit" />
 			{/if}
+			<div class="page-cover" bind:this={consoleCSV}>
+				<div class="console-container">
+					<Console/>
+				</div>
+			</div>
 		</form>
 	</div>
 </main>
 
 <style>
+	.page-cover{
+		position: fixed;
+		left: 0;
+		top: 30px;
+		height: calc(100vh - 30px);
+		width: 100vw;
+		background-color: rgba(128, 128, 128, 0.14);
+		backdrop-filter: blur(5px);
+		display: none;
+		justify-content: center;
+		align-items: center;
+	}
+	.console-container{
+		width: 100%;
+		height: 100%;
+		max-width: 600px;
+		max-height: 400px;
+	}
 	main {
 		display: flex;
 		flex-direction: column;
@@ -104,9 +137,9 @@
 	form {
 		display: none;
 		position: absolute;
-		top: 0;
+		top: 30px;
 		left: 0;
-		height: 100%;
+		height: calc(100% - 30px);
 		width: 100%;
 		background-color: var(--cor-tema-fundo-2);
 		padding: 20px;

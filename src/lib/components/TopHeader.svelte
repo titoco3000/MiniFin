@@ -2,6 +2,8 @@
 	import { appWindow } from '@tauri-apps/api/window';
 	import { onMount } from 'svelte';
 	export let inicial = 0;
+
+	export let options = [["Formulário","form"],["Vizualizar","viz"],["Ferramentas","ferramentas"]];
 	
 	let tabsEl: HTMLElement;
 	function cliqueTab(evento: Event) {
@@ -29,12 +31,14 @@
 	}
 	
 	onMount(()=>{
-		let child = tabsEl.children[inicial+1];
-		if(child){
-			(child as HTMLElement).style.setProperty('--cor-principal', 'var(--cor-tema-forte)');
-			(child as HTMLElement).style.setProperty('--cor-fundo', 'white');
-			(child as HTMLElement).style.setProperty('cursor', 'default');
-			(child as HTMLElement).style.borderRadius = '10px 10px 0 0';
+		if(options.length>0){
+			let child = tabsEl.children[inicial+1];
+			if(child){
+				(child as HTMLElement).style.setProperty('--cor-principal', 'var(--cor-tema-forte)');
+				(child as HTMLElement).style.setProperty('--cor-fundo', 'white');
+				(child as HTMLElement).style.setProperty('cursor', 'default');
+				(child as HTMLElement).style.borderRadius = '10px 10px 0 0';
+			}
 		}
 	})
 </script>
@@ -42,9 +46,9 @@
 <nav>
 	<div id="tabs" bind:this={tabsEl}>
 		<div class="logo-holder"></div>
-		<button on:click={()=>{window.location.replace("form")}}><span>Formulário</span></button>
-		<button on:click={()=>{window.location.replace("viz")}}><span>Visualizar</span></button>
-		<button on:click={()=>{window.location.replace("ferramentas")}}><span>Ferramentas</span></button>
+		{#each options as tab }
+		<button on:click={()=>{window.location.replace(tab[1])}}><span>{tab[0]}</span></button>
+		{/each}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="spacer" on:mousedown={appWindow.startDragging}></div>
 	</div>
