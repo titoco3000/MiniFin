@@ -5,11 +5,14 @@ use tauri::Manager;
 
 pub mod storage;
 pub mod tipos;
+#[macro_use]
+pub mod custom_console;
 
 use futures::executor;
 use tipos::SortParameter;
 use std::{path::PathBuf, sync::Mutex};
 use storage::BancoDeDados;
+
 
 pub type SqlDateTime = sqlx::types::chrono::NaiveDate;
 
@@ -184,57 +187,62 @@ fn renomear_fornecedor(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,o
             .unwrap().as_mut().unwrap().renomear_fornecedor(&original,&novo));
 }
 
-
+use custom_console::macros as console;
 fn main() {
-    let db_mutex = Mutex::new( match storage::Config::ler() {
-        Ok(_config_file) => match executor::block_on(storage::BancoDeDados::abrir()) {
-            Ok(database) => {
-                Some(database)
-            }
-            Err(e) => {
-                panic!("Erro ao abrir db: {}", e);
-            }
-        },
-        Err(_) => {
-            None
-        }
-    });
+    console::teste();
+    console::regular!("oie");
+    console::good!("oie");
+    console::alert!("oie");
+    console::bad!("oie");
+    // let db_mutex = Mutex::new( match storage::Config::ler() {
+    //     Ok(_config_file) => match executor::block_on(storage::BancoDeDados::abrir()) {
+    //         Ok(database) => {
+    //             Some(database)
+    //         }
+    //         Err(e) => {
+    //             panic!("Erro ao abrir db: {}", e);
+    //         }
+    //     },
+    //     Err(_) => {
+    //         None
+    //     }
+    // });
 
-    let eh_instalacao = db_mutex.lock().unwrap().is_some();
+    // let eh_instalacao = db_mutex.lock().unwrap().is_some();
 
-    tauri::Builder::default()
-    .manage(db_mutex)
-    .setup(move |app| {
-        let window = app.get_window("main").unwrap();
+    // tauri::Builder::default()
+    // .manage(db_mutex)
+    // .setup(move |app| {
+    //     let window = app.get_window("main").unwrap();
         
-        #[cfg(target_os = "windows")]
-        {
-            use window_shadows::set_shadow;
-            set_shadow(&window, true).expect("Unsupported platform!");
-        }
+    //     #[cfg(target_os = "windows")]
+    //     {
+    //         use window_shadows::set_shadow;
+    //         set_shadow(&window, true).expect("Unsupported platform!");
+    //     }
         
-        if eh_instalacao{
-            window.eval("window.location.replace('form');").expect("erro ao executar js");
-        }
-        Ok(())
-    })
-    .invoke_handler(tauri::generate_handler![
-        listar_caixas,
-        listar_tipos_pagamento,
-        listar_setores,
-        listar_empresas,
-        listar_fornecedores,
-        listar_gastos,
-        validar_gasto,
-        registrar_gasto,
-        importar_csv_aldeia,
-        checar_tipo_de_janela,
-        definir_local_bd,
-        contar_gastos,
-        somar_gastos,
-        remover_gasto,
-        renomear_fornecedor
-    ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+    //     if eh_instalacao{
+    //         window.eval("window.location.replace('form');").expect("erro ao executar js");
+    //     }
+    //     Ok(())
+    // })
+    // .invoke_handler(tauri::generate_handler![
+    //     listar_caixas,
+    //     listar_tipos_pagamento,
+    //     listar_setores,
+    //     listar_empresas,
+    //     listar_fornecedores,
+    //     listar_gastos,
+    //     validar_gasto,
+    //     registrar_gasto,
+    //     importar_csv_aldeia,
+    //     checar_tipo_de_janela,
+    //     definir_local_bd,
+    //     contar_gastos,
+    //     somar_gastos,
+    //     remover_gasto,
+    //     renomear_fornecedor
+    // ])
+    //     .run(tauri::generate_context!())
+    //     .expect("error while running tauri application");
 }
