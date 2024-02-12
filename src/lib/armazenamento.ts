@@ -130,3 +130,7 @@ export async function renomearFornecedor(original:string, novo:string) {
 	invoke('renomear_fornecedor',{original, novo});
 	
 }
+
+export async function extrairDadosTerminal():Promise<string[][]> {
+	return await invoke('extrair_dados_terminal');
+}
