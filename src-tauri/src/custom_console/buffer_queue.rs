@@ -1,4 +1,5 @@
-use super::log_message::LogMessage::{self, *};
+use super::log_message::LogMessage::*;
+pub use super::log_message::LogMessage;
 use colored::Colorize;
 use std::collections::VecDeque;
 pub struct BufferQueue(VecDeque<LogMessage>);
@@ -29,6 +30,10 @@ impl BufferQueue {
     }
     pub fn bad(&mut self, msg: String) {
         self.add_message(Bad(msg));
+    }
+
+    pub fn extract(&mut self)->Vec<LogMessage>{
+        self.0.drain(..).rev().collect()
     }
 }
 

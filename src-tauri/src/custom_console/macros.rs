@@ -10,12 +10,12 @@ macro_rules! alert {
 macro_rules! bad {
     ($($arg:tt)*) => { { unsafe{ crate::custom_console::buffer_queue::BUFFER.bad(format!("{}:{} - ", file!(), line!()) + &format!($($arg)*)); } } };
 }
+macro_rules! extract {
+    () => { { unsafe{ crate::custom_console::buffer_queue::BUFFER.extract() } } };
+}
             
 pub(crate) use regular;
 pub(crate) use good;
 pub(crate) use alert;
 pub(crate) use bad;
-
-pub fn teste() {
-    println!("teste");
-}
+pub(crate) use extract;

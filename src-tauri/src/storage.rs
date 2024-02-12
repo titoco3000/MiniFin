@@ -4,6 +4,7 @@ use futures::executor;
 use serde::Serialize;
 use sqlx::Row;
 
+use crate::custom_console::macros as console;
 use crate::tipos::*;
 use crate::SqlDateTime;
 use sqlx::migrate::MigrateDatabase;
@@ -204,7 +205,7 @@ impl BancoDeDados {
         {
             Ok(pagamento) => pagamento,
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 None
             }
         }
@@ -221,7 +222,7 @@ impl BancoDeDados {
         {
             Ok(caixa) => caixa,
             Err(e) => {
-                eprintln!("Erro na linha {}: {}", line!(), e);
+                console::bad!("Erro na linha {}: {}", line!(), e);
                 None
             }
         }
@@ -238,7 +239,7 @@ impl BancoDeDados {
         {
             Ok(empresa) => empresa,
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 None
             }
         }
@@ -258,7 +259,7 @@ impl BancoDeDados {
                 {
                     Ok(empresa) => empresa,
                     Err(e) => {
-                        eprintln!("line {}: {}", line!(), e);
+                        console::bad!("line {}: {}", line!(), e);
                         None
                     }
                 }
@@ -278,7 +279,7 @@ impl BancoDeDados {
         {
             Ok(f) => f,
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 None
             }
         }
@@ -296,7 +297,7 @@ impl BancoDeDados {
         {
             Ok(pagamento) => Some(pagamento),
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 None
             }
         }
@@ -312,7 +313,7 @@ impl BancoDeDados {
         {
             Ok(caixa) => Some(caixa),
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 None
             }
         }
@@ -328,7 +329,7 @@ impl BancoDeDados {
         {
             Ok(empresa) => Some(empresa),
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 None
             }
         }
@@ -345,7 +346,7 @@ impl BancoDeDados {
         {
             Ok(empresa) => Some(empresa),
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 None
             }
         }
@@ -361,7 +362,7 @@ impl BancoDeDados {
         {
             Ok(empresa) => Some(empresa),
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 None
             }
         }
@@ -374,7 +375,7 @@ impl BancoDeDados {
         {
             Ok(caixas) => caixas,
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 Vec::new()
             }
         }
@@ -387,7 +388,7 @@ impl BancoDeDados {
         {
             Ok(v) => v,
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 Vec::new()
             }
         }
@@ -400,7 +401,7 @@ impl BancoDeDados {
         {
             Ok(v) => v,
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 Vec::new()
             }
         }
@@ -412,7 +413,7 @@ impl BancoDeDados {
         {
             Ok(v) => v,
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 Vec::new()
             }
         }
@@ -425,7 +426,7 @@ impl BancoDeDados {
         {
             Ok(v) => v,
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 Vec::new()
             }
         }
@@ -454,7 +455,7 @@ impl BancoDeDados {
             query += &condicoes;
             query += " )";
         }
-        println!("{}",&query);
+        console::regular!("{}",&query);
 
         sqlx::query(
             &query
@@ -487,7 +488,7 @@ impl BancoDeDados {
             query += " )";
         }
 
-        println!("Somando de: {}",query);
+        console::regular!("Somando de: {}",query);
 
         sqlx::query(
             &query
@@ -536,7 +537,7 @@ impl BancoDeDados {
                 fornecedor.push(valor);
             }
             else {
-                println!("Fornecedor não reconhecido: {}",nome);
+                console::alert!("Fornecedor não reconhecido: {}",nome);
             }
         }
 
@@ -738,12 +739,12 @@ impl BancoDeDados {
             query += &format!(" OFFSET {}", off);
         }
 
-        println!("Pedindo: \n\"{}\"", query);
+        console::regular!("Pedindo: \n\"{}\"", query);
 
         match sqlx::query_as::<_, Gasto>(&query).fetch_all(&self.0).await {
             Ok(v) => v,
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 Vec::new()
             }
         }
@@ -795,7 +796,7 @@ impl BancoDeDados {
         if nome.trim().is_empty() {
             return Err("nome vazio".to_string());
         }
-        println!("vendo se fornecedor ja existe");
+        console::regular!("vendo se fornecedor ja existe");
         match self.obter_fornecedor(&nome).await {
             Some(f) => {
                 //se info está diferente
@@ -803,7 +804,7 @@ impl BancoDeDados {
                     || f.id_tipo_pagamento != pagamento_preferido.id
                     || f.id_caixa != caixa_preferido.id
                 {
-                    println!(
+                    console::regular!(
                         "Fornecedor existe! Atualizando:\n{}",
                         &format!(
                             "UPDATE Fornecedores SET 
@@ -833,7 +834,7 @@ impl BancoDeDados {
                 Ok(f)
             }
             None => {
-                println!("Fornecedor nao existe");
+                console::regular!("Fornecedor nao existe");
                 match sqlx::query_as::<_, Fornecedor>(&format!(
                     "INSERT INTO Fornecedores 
                             (nome, id_setor, id_tipo_pagamento, id_caixa)
@@ -848,7 +849,7 @@ impl BancoDeDados {
                 {
                     Ok(f) => Ok(f),
                     Err(e) => {
-                        println!("e (line {}): {}", line!(), e);
+                        console::bad!("e (line {}): {}", line!(), e);
                         Err(e.to_string())
                     }
                 }
@@ -868,7 +869,7 @@ impl BancoDeDados {
         fornecedor: &Fornecedor,
         obs: String,
     ) -> Result<Vec<String>, Vec<String>> {
-        println!("Registrar gasto()");
+        console::regular!("Registrar gasto()");
         let mut problemas = Vec::with_capacity(9);
 
         if self.obter_gasto(&fornecedor, nf).await.is_some() {
@@ -876,7 +877,7 @@ impl BancoDeDados {
         }
 
         if problemas.len() == 0 {
-            println!("sem problemas até aqui");
+            console::regular!("sem problemas até aqui");
 
             match sqlx::query(&format!(
                 "INSERT INTO Gastos 
@@ -899,7 +900,7 @@ impl BancoDeDados {
                 Ok(_) => Ok(Vec::new()),
                 Err(e) => {
                     problemas.push(format!("Erro SQL: {}", e));
-                    println!("Erro SQL: {}", e);
+                    console::bad!("Erro SQL: {}", e);
                     Err(problemas)
                 }
             }
@@ -912,7 +913,7 @@ impl BancoDeDados {
         &mut self,
         json_str: &str,
     ) -> Result<Vec<String>, Vec<String>> {
-        println!("Recebi json: {}", json_str);
+        console::regular!("Recebi json: {}", json_str);
         let mut problemas = Vec::with_capacity(9);
 
         if let Ok(json_obj) = serde_json::from_str::<serde_json::Value>(json_str) {
@@ -947,7 +948,7 @@ impl BancoDeDados {
                     }
                 }
                 serde_json::Value::Null => {
-                    println!("é null");
+                    console::alert!("é null");
                     problemas.push(String::from("nenhum caixa recebido"));
                     None
                 }
@@ -1028,7 +1029,7 @@ impl BancoDeDados {
                         {
                             Ok(v) => Some(v),
                             Err(e) => {
-                                eprintln!("Erro ao reg/att fornecedor: {}", e);
+                                console::bad!("Erro ao reg/att fornecedor: {}", e);
                                 problemas.push(e);
                                 None
                             }
@@ -1166,7 +1167,7 @@ impl BancoDeDados {
             let _data = if let serde_json::Value::String(data_str) = &json_obj["data"] {
                 match data_str.parse::<SqlDateTime>() {
                     Ok(v) => {
-                        println!("talvez seria bom alguma verificação de data...?");
+                        console::alert!("talvez seria bom alguma verificação de data...?");
                         Some(v)
                     }
                     Err(_) => {
@@ -1228,7 +1229,7 @@ impl BancoDeDados {
         fornecedores_path: &PathBuf,
         gastos_path: &PathBuf,
     ) -> Result<(), String> {
-        println!("Importando CSVs");
+        console::regular!("Importando CSVs");
         let fornecedores = std::fs::read_to_string(fornecedores_path).unwrap();
         let gastos = std::fs::read_to_string(gastos_path).unwrap();
 
@@ -1260,7 +1261,7 @@ impl BancoDeDados {
                     pagamentos.push(record[2].clone());
                 }
             } else {
-                println!("Não fez a linha: \"{}\"", linha);
+                console::alert!("Não fez a linha: \"{}\"", linha);
             }
         }
 
@@ -1286,11 +1287,11 @@ impl BancoDeDados {
                     pagamentos.push(record[4].clone());
                 }
             } else {
-                println!("Não fez a linha: \"{}\"", linha);
+                console::alert!("Não fez a linha: \"{}\"", linha);
             }
         }
 
-        println!(
+        console::regular!(
             "Registrando: {:#?}",
             (&caixas, &empresas, &setores, &pagamentos)
         );
@@ -1325,7 +1326,7 @@ impl BancoDeDados {
                     return Err(format!("Erro com fornecedor: {:?}", record));
                 }
             } else {
-                println!("Não fez a linha: \"{}\"", linha);
+                console::alert!("Não fez a linha: \"{}\"", linha);
             }
         }
         for linha in gastos.split('\n') {
@@ -1386,7 +1387,7 @@ impl BancoDeDados {
                 .await
                 .expect("Erro ao registrar gasto");
             } else {
-                println!("Não fez a linha: \"{}\"", linha);
+                console::alert!("Não fez a linha: \"{}\"", linha);
             }
         }
 
@@ -1473,7 +1474,7 @@ impl BancoDeDados {
         {
             Ok(gasto) => gasto,
             Err(e) => {
-                eprintln!("line {}: {}", line!(), e);
+                console::bad!("line {}: {}", line!(), e);
                 None
             }
         }

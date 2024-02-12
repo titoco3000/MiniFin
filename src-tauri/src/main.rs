@@ -8,11 +8,11 @@ pub mod tipos;
 #[macro_use]
 pub mod custom_console;
 
+use custom_console::macros::{self as console, extract};
 use futures::executor;
-use tipos::SortParameter;
 use std::{path::PathBuf, sync::Mutex};
 use storage::BancoDeDados;
-
+use tipos::SortParameter;
 
 pub type SqlDateTime = sqlx::types::chrono::NaiveDate;
 
@@ -30,7 +30,12 @@ fn listar_caixas(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> Str
 #[tauri::command]
 fn listar_tipos_pagamento(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().as_mut().unwrap().listar_tipos_pagamento(),
+        database
+            .lock()
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .listar_tipos_pagamento(),
     ))
     .unwrap()
 }
@@ -54,23 +59,44 @@ fn listar_empresas(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> S
 #[tauri::command]
 fn listar_fornecedores(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().as_mut().unwrap().listar_fornecedores(),
+        database
+            .lock()
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .listar_fornecedores(),
     ))
     .unwrap()
 }
 
 #[tauri::command]
-fn validar_gasto(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, json_data: &str) -> String {
+fn validar_gasto(
+    database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
+    json_data: &str,
+) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().as_mut().unwrap().validar_gasto_de_json(json_data),
+        database
+            .lock()
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .validar_gasto_de_json(json_data),
     ))
     .unwrap()
 }
 
 #[tauri::command]
-fn registrar_gasto(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, json_data: &str) -> String {
+fn registrar_gasto(
+    database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
+    json_data: &str,
+) -> String {
     serde_json::to_string(&executor::block_on(
-        database.lock().unwrap().as_mut().unwrap().registrar_gasto_de_json(json_data),
+        database
+            .lock()
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .registrar_gasto_de_json(json_data),
     ))
     .unwrap()
 }
@@ -79,14 +105,16 @@ fn registrar_gasto(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, json
 fn listar_gastos(
     database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
     filtro: tipos::FiltroGasto,
-    limit:u32,
-    offset:u32,
-    sorter:SortParameter
+    limit: u32,
+    offset: u32,
+    sorter: SortParameter,
 ) -> String {
     serde_json::to_string(&executor::block_on(
         database
             .lock()
-            .unwrap().as_mut().unwrap()
+            .unwrap()
+            .as_mut()
+            .unwrap()
             .listar_gastos_filtrados_descompactados(&filtro, Some(limit), Some(offset), &sorter),
     ))
     .unwrap()
@@ -111,138 +139,172 @@ fn checar_tipo_de_janela(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>
 }
 
 #[tauri::command]
-fn definir_local_bd(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>, local: &str) -> String {
-    println!("definir_local_bd");
+fn definir_local_bd(
+    database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
+    local: &str,
+) -> String {
     let mut local = PathBuf::from(local);
     local.push("minifin");
     local.push("minifin.db");
     serde_json::to_string(&match storage::Config::new(local.clone()).salvar() {
-         Ok(_) => {
-            let db:Option<BancoDeDados> = match executor::block_on(storage::BancoDeDados::abrir()) {
-                Ok(db)=>Some(db),
-                Err(_)=>{
-                    match executor::block_on(storage::criar_database(&local)) {
-                        Ok(_)=>{
-                            match executor::block_on(storage::BancoDeDados::abrir()) {
-                                Ok(bd)=>Some(bd),
-                                Err(e)=>{
-                                    println!("Erro ao abrir bd depos de criar: {}", e);
-                                    None
-                                }
-                            }
-                        },
-                        Err(e)=>{
-                            println!("Erro ao criar bd: {}", e);
+        Ok(_) => {
+            let db: Option<BancoDeDados> = match executor::block_on(storage::BancoDeDados::abrir())
+            {
+                Ok(db) => Some(db),
+                Err(_) => match executor::block_on(storage::criar_database(&local)) {
+                    Ok(_) => match executor::block_on(storage::BancoDeDados::abrir()) {
+                        Ok(bd) => Some(bd),
+                        Err(e) => {
+                            console::bad!("Erro ao abrir bd depos de criar: {}", e);
                             None
                         }
+                    },
+                    Err(e) => {
+                        console::bad!("Erro ao criar banco de dados: {}", e);
+                        None
                     }
-                }
+                },
             };
 
             match db {
-                Some(db)=>{
+                Some(db) => {
                     *database.lock().unwrap() = Some(db);
                     Ok(())
-                },
-                None =>
-                    Err("Erro ao abrir bd depos de criar".to_owned())
+                }
+                None => Err("Erro ao abrir bd depos de criar".to_owned()),
             }
-         }
-        Err(_) => {
-            println!("Erro ao salvar config");
-            Err("Erro ao salvar config".to_owned())
-
         }
-    }).expect("Erro ao jsonificar")
+        Err(_) => {
+            console::regular!("Erro ao salvar config");
+            Err("Erro ao salvar config".to_owned())
+        }
+    })
+    .expect("Erro ao jsonificar")
 }
 
 #[tauri::command]
-fn contar_gastos(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,filtro: tipos::FiltroGasto) -> u32{
+fn contar_gastos(
+    database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
+    filtro: tipos::FiltroGasto,
+) -> u32 {
     executor::block_on(
         database
             .lock()
-            .unwrap().as_mut().unwrap().contar_gastos(&filtro))
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .contar_gastos(&filtro),
+    )
 }
 #[tauri::command]
-fn somar_gastos(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,filtro: tipos::FiltroGasto) -> u32{
+fn somar_gastos(
+    database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
+    filtro: tipos::FiltroGasto,
+) -> u32 {
     executor::block_on(
         database
             .lock()
-            .unwrap().as_mut().unwrap().somar_gastos(&filtro))
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .somar_gastos(&filtro),
+    )
 }
 
 #[tauri::command]
-fn remover_gasto(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,fornecedor:String,nf:u32){
+fn remover_gasto(
+    database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
+    fornecedor: String,
+    nf: u32,
+) {
     executor::block_on(
         database
             .lock()
-            .unwrap().as_mut().unwrap().remover_gasto(nf,&fornecedor)).unwrap();
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .remover_gasto(nf, &fornecedor),
+    )
+    .unwrap();
 }
 
 #[tauri::command]
-fn renomear_fornecedor(database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,original:String, novo:String){
+fn renomear_fornecedor(
+    database: tauri::State<'_, Mutex<Option<BancoDeDados>>>,
+    original: String,
+    novo: String,
+) {
     executor::block_on(
         database
             .lock()
-            .unwrap().as_mut().unwrap().renomear_fornecedor(&original,&novo));
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .renomear_fornecedor(&original, &novo),
+    );
 }
 
-use custom_console::macros as console;
+#[tauri::command]
+async fn extrair_dados_terminal() -> Vec<(String, String)> {
+    use custom_console::buffer_queue::LogMessage::*;
+    extract!().iter().map(|d| match d {
+        Regular(m) => (m.clone(), "Regular".to_owned()),
+        Good(m) => (m.clone(), "Good".to_owned()),
+        Alert(m) => (m.clone(), "Alert".to_owned()),
+        Bad(m) => (m.clone(), "Bad".to_owned())
+    }).collect()
+}
+
 fn main() {
-    console::teste();
-    console::regular!("oie");
-    console::good!("oie");
-    console::alert!("oie");
-    console::bad!("oie");
-    // let db_mutex = Mutex::new( match storage::Config::ler() {
-    //     Ok(_config_file) => match executor::block_on(storage::BancoDeDados::abrir()) {
-    //         Ok(database) => {
-    //             Some(database)
-    //         }
-    //         Err(e) => {
-    //             panic!("Erro ao abrir db: {}", e);
-    //         }
-    //     },
-    //     Err(_) => {
-    //         None
-    //     }
-    // });
+    let db_mutex = Mutex::new(match storage::Config::ler() {
+        Ok(_config_file) => match executor::block_on(storage::BancoDeDados::abrir()) {
+            Ok(database) => Some(database),
+            Err(_) => {
+                console::alert!("Erro ao abrir banco de dados");
+                None
+            }
+        },
+        Err(_) => None,
+    });
 
-    // let eh_instalacao = db_mutex.lock().unwrap().is_some();
+    let eh_instalacao = db_mutex.lock().unwrap().is_some();
 
-    // tauri::Builder::default()
-    // .manage(db_mutex)
-    // .setup(move |app| {
-    //     let window = app.get_window("main").unwrap();
-        
-    //     #[cfg(target_os = "windows")]
-    //     {
-    //         use window_shadows::set_shadow;
-    //         set_shadow(&window, true).expect("Unsupported platform!");
-    //     }
-        
-    //     if eh_instalacao{
-    //         window.eval("window.location.replace('form');").expect("erro ao executar js");
-    //     }
-    //     Ok(())
-    // })
-    // .invoke_handler(tauri::generate_handler![
-    //     listar_caixas,
-    //     listar_tipos_pagamento,
-    //     listar_setores,
-    //     listar_empresas,
-    //     listar_fornecedores,
-    //     listar_gastos,
-    //     validar_gasto,
-    //     registrar_gasto,
-    //     importar_csv_aldeia,
-    //     checar_tipo_de_janela,
-    //     definir_local_bd,
-    //     contar_gastos,
-    //     somar_gastos,
-    //     remover_gasto,
-    //     renomear_fornecedor
-    // ])
-    //     .run(tauri::generate_context!())
-    //     .expect("error while running tauri application");
+    tauri::Builder::default()
+        .manage(db_mutex)
+        .setup(move |app| {
+            let window = app.get_window("main").unwrap();
+
+            #[cfg(target_os = "windows")]
+            {
+                use window_shadows::set_shadow;
+                set_shadow(&window, true).expect("Unsupported platform!");
+            }
+
+            if eh_instalacao {
+                window
+                    .eval("window.location.replace('form');")
+                    .expect("erro ao executar js");
+            }
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            listar_caixas,
+            listar_tipos_pagamento,
+            listar_setores,
+            listar_empresas,
+            listar_fornecedores,
+            listar_gastos,
+            validar_gasto,
+            registrar_gasto,
+            importar_csv_aldeia,
+            checar_tipo_de_janela,
+            definir_local_bd,
+            contar_gastos,
+            somar_gastos,
+            remover_gasto,
+            renomear_fornecedor,
+            extrair_dados_terminal
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
