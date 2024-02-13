@@ -148,7 +148,6 @@
 		sorterReverse: boolean
 	): Promise<string[][]> {
 		let resposta: string[][] = [];
-		exportarParaXlsx(filtroAplicado,{ i: sorterIndex, d: sorterReverse });
 		(
 			await listarGastos(filtroAplicado, { i: sorterIndex, d: sorterReverse }, limit, offset)
 		).forEach((gasto) => {
@@ -350,6 +349,7 @@
                 {titulos}
                 {carregarValores}
                 calcularMaxRows={contarRows}
+				exportar={(sorterIndex,reverse)=>{exportarParaXlsx(filtroAplicado,{ i: sorterIndex, d: reverse });}}
                 bind:valorInferior={somatorioValor}
             />
         </div>

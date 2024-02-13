@@ -35,6 +35,9 @@
 		firstVisibleIndex = sorterReverse ? maxRows : Math.min(1, tbodyEl.childElementCount);
 	}
 
+	export let exportar = (sorterIndex: number,
+		sorterReverse: boolean) => { };
+
 	let tableHeaderEl: HTMLTableRowElement;
 	let tbodyEl: HTMLTableSectionElement;
 	let tdBlueprint: HTMLElement;
@@ -189,7 +192,24 @@
 			<tr>
 				<td
 					colspan={titulos.length - 2 - Math.floor((titulos.length - 2) / 2)}
-					style="text-align: right;">{legendaInferior}</td
+					style="text-align: right;"><div id="left-footer">
+						<button on:click={()=>exportar(sorterIndex, sorterReverse)}>
+							<div id="spreadsheet-container">
+								<div id="spreadsheet-icon">
+									<table>
+										<tr><td></td><td></td></tr>
+										<tr><td></td><td></td></tr>
+										<tr><td></td><td></td></tr>
+									</table>
+								</div>
+								
+							</div>
+							<span>Exportar</span>
+						</button>
+						<span>
+							{legendaInferior}
+						</span>
+					</div></td
 				>
 				<td colspan={Math.floor((titulos.length - 2) / 2)}>{valorInferior}</td>
 				<td colspan="2" style="text-align: right;">
@@ -202,6 +222,92 @@
 <p id="tooltip" bind:this={tooltipEl}></p>
 
 <style>
+	#left-footer{
+		display: flex;
+		justify-content: space-between;
+	}
+	#left-footer button{
+		padding: 0;
+		border: none;
+		display: flex;
+		align-items: center;
+		background-color: transparent;
+	}
+	#spreadsheet-container{
+		height: 20px;
+		width: 20px;
+		display: inline-block;
+		position: relative;
+	}
+	#spreadsheet-icon{
+		background-color: #2d9b2d;
+		height: 24px;
+		width: 20px;
+		position: absolute;
+		border-radius: 2px;
+		top: -2px;
+		left: 0;
+		padding: 8px 5px;
+		transform: rotate(0);
+	}
+	button:hover #spreadsheet-icon{
+		animation: wave 0.8s forwards;
+	}
+	#spreadsheet-icon::after{
+		content: '';
+		position: absolute;
+		top: 0;
+		right: 0;
+		background-color: var(--cor-tema-fraca);
+		width: 6px;
+		height: 6px;
+		border-radius: 0 0 0 2px;
+		background-image:
+			linear-gradient(to bottom left, transparent 50%, rgb(191, 205, 218) 0),
+			linear-gradient(to top right, rgb(191, 205, 218) 50%, transparent 0);
+	}
+	#spreadsheet-icon table{
+		height: 10px;
+		border-collapse: collapse;
+	}
+	#spreadsheet-icon td{
+		padding: 0;
+		height: 0px;
+		width: 1px;
+		background-color: transparent;
+		border: 1px solid white;
+	}
+	#left-footer span{
+		display: flex;
+		align-items: center;
+	}
+	#left-footer button span{
+		width: 0px;
+		transition: width 0.5s, color 0.5s;
+		justify-content: end;
+		overflow: hidden;
+		color: #2d9b2d;
+	}
+	#left-footer button:hover span{
+		width: 55px;
+		color: black;
+	}
+	@keyframes wave{
+		0%{
+			transform: rotate(0);
+		}
+		25%{
+			transform: rotate(5deg);
+		}
+		70%{
+			transform: rotate(-3deg);
+		}
+		100%{
+			transform: rotate(0);
+		}
+	}
+
+
 	#tooltip {
 		background-color: var(--cor-tema-fraca);
 		border: 2px solid black;
