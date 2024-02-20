@@ -5,8 +5,12 @@ tive que instalar
 npm add -D @tauri-apps/api
 
 A fazer:
-- menu contextual
-- imprimir tabela inteira
+- Ferramentas : editar gasto para excluir, aumentar tamanho 
+- Tabela padrao: organizar data decrescente
+- Data padrao: 1 mes atras
+- Retirar esfumaçado filtro 
+- Melhorar pesquisa 
+- Bug: contagem pesquisar GPS
 - Configuração básica novo usuario
 - Localizar banco
 
