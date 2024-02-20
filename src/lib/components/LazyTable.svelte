@@ -44,7 +44,7 @@
 	let mainEl: HTMLElement;
 	let offset = 0;
 	let sorterIndex = 0;
-	let sorterReverse = false;
+	let sorterReverse = true;
 	let firstVisibleIndex = 0;
 
 	let maxRows: number;
@@ -395,7 +395,7 @@
 		height: 20px;
 		flex: 0 0 20px;
 		padding: 5px;
-		transform: rotate(90deg);
+		transform: rotate(-90deg);
 		display: none;
 	}
 	thead th:first-child button > img {
