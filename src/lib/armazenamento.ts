@@ -83,6 +83,10 @@ export class FiltroGastos {
 	obs_pesquisa:string[] = [''];
 	conteudo:string[] = [''];
 
+	constructor(dataInicial = '',dataFinal='') {
+		this.data_inicial = [dataInicial];
+		this.data_final = [dataFinal];
+	  }
 	equals(outro: FiltroGastos) {
 		return JSON.stringify(this) == JSON.stringify(outro);
 	}

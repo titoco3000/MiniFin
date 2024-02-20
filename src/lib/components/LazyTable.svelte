@@ -5,7 +5,7 @@
 	export let titulos: string[] = [];
 	export let legendaInferior = 'Total';
 	export let valorInferior = '';
-	export let batchSize = 40;
+	export let batchSize = 70;
 	export let calcularMaxRows = async (): Promise<number> => {
 		return 1000;
 	};
@@ -25,14 +25,16 @@
 	export function reset() {
 		console.log('reset table');
 
-		calcularMaxRows().then((v) => {
-			maxRows = v;
-		});
 		mainEl.scrollTop = 0;
 		offset = 0;
 		tbodyEl.replaceChildren();
 		incluirNovosValoresNaTabela();
-		firstVisibleIndex = sorterReverse ? maxRows : Math.min(1, tbodyEl.childElementCount);
+
+		calcularMaxRows().then((v) => {
+			maxRows = v;
+			firstVisibleIndex = sorterReverse ? maxRows : Math.min(1, tbodyEl.childElementCount);
+		});
+		
 	}
 
 	export let exportar = (sorterIndex: number,
@@ -47,7 +49,7 @@
 	let sorterReverse = true;
 	let firstVisibleIndex = 0;
 
-	let maxRows: number;
+	let maxRows: number = 0;
 
 	function getRowAtId(id: number) {
 		return [id.toString(), id.toString(), id.toString(), id.toString(), id.toString()];

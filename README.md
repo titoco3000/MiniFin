@@ -5,8 +5,6 @@ tive que instalar
 npm add -D @tauri-apps/api
 
 A fazer:
-- Data padrao: 1 mes atras
-- Retirar esfumaçado filtro 
 - Melhorar pesquisa 
 - Bug: contagem pesquisar GPS
 - excluir a partir da tabela

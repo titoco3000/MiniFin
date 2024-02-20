@@ -39,8 +39,6 @@
 		}
 		else 
 		limiter.style.height = entry.contentRect.height + 'px';
-	console.log(entry.contentRect.height + 'px');
-	
 	}
 	onMount(() => {
 		let ov = overflow.split(' ');
