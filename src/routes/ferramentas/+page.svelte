@@ -24,7 +24,7 @@
     <TopHeader inicial={2}/>
     <div id="content">
         <nav bind:this={buttonsHolder}>
-            <button on:click={()=>revelarFerramenta(0)}>Editar gasto</button>
+            <button on:click={()=>revelarFerramenta(0)}>Excluir gasto</button>
             <button on:click={()=>revelarFerramenta(1)}>Editar fornecedor</button>
         </nav>
         <div id="container-ferramentas" bind:this={contentHolder}>
