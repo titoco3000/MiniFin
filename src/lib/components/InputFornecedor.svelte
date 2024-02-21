@@ -92,13 +92,15 @@
 		let C = [];
 		
 		for (let f of fornecedores) {
-			if(f.nome.includes(target.toLowerCase))
+			if(f.nome.toLowerCase().startsWith(target.toLowerCase()))
 				A.push(f);
 			else if(f.nome.toLowerCase().includes(target.toLowerCase()))
 				B.push(f);
 			else
 				C.push(f);
 		}
+		console.log(A);
+		
 		fornecedores = A.concat(B,C);
 
 		return fornecedores;
@@ -155,11 +157,9 @@
 				visualFornecedores = assignDistancesAndSort(valor);
 			}}
 			on:focusout={()=>{
-				// if(!permitirNovo && !fornecedores.find(ehMesmoFornecedor))
-				// 	console.log(fornecedores);
-				
-				// 	valor = fornecedores[0].nome;
-				// onEdit(valor);
+				if(!permitirNovo && !fornecedores.find(ehMesmoFornecedor))
+					valor = fornecedores[0].nome;
+				onEdit(valor);
 			}}
 		/>
 		<button type="button" class="show-suggestions" on:click={exibirTodosFornecedores}></button>
@@ -211,6 +211,9 @@
 		top: calc( var(--tema-altura-input) - 14px );
 		z-index: 10;
 		border-top: 0;
+		max-height: 300px;
+		overflow: auto;
+		box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.365);
 	}
 	li {
 		border: 1px solid black;
