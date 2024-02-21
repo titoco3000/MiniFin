@@ -596,9 +596,9 @@ impl BancoDeDados {
                             fim.unwrap()
                         )
                     } else if inicio.is_some() {
-                        format!("(data >= '{}')", inicio.unwrap())
+                        format!("(Gastos.data >= '{}')", inicio.unwrap())
                     } else if fim.is_some() {
-                        format!("(data <= '{}')", fim.unwrap())
+                        format!("(Gastos.data <= '{}')", fim.unwrap())
                     } else {
                         "".to_owned()
                     }
@@ -607,17 +607,17 @@ impl BancoDeDados {
                 .join(" OR "),
             fornecedor
                 .iter()
-                .map(|x| format!("id_fornecedor = {}", x.id))
+                .map(|x| format!("Gastos.id_fornecedor = {}", x.id))
                 .collect::<Vec<String>>()
                 .join(" OR "),
             caixa
                 .iter()
-                .map(|x| format!("id_caixa = {}", x.id))
+                .map(|x| format!("Gastos.id_caixa = {}", x.id))
                 .collect::<Vec<String>>()
                 .join(" OR "),
             pagamento
                 .iter()
-                .map(|x| format!("id_tipo_pagamento = {}", x.id))
+                .map(|x| format!("Gastos.id_tipo_pagamento = {}", x.id))
                 .collect::<Vec<String>>()
                 .join(" OR "),
             if setor.is_empty() && empresa.is_empty() {
@@ -625,7 +625,7 @@ impl BancoDeDados {
             } else if empresa.is_empty() {
                 setor
                     .iter()
-                    .map(|x| format!("id_setor = {}", x.id))
+                    .map(|x| format!("Gastos.id_setor = {}", x.id))
                     .collect::<Vec<String>>()
                     .join(" OR ")
             } else if setor.is_empty() {
@@ -633,14 +633,14 @@ impl BancoDeDados {
                     .await
                     .iter()
                     .filter(|setor| empresa.iter().any(|empresa| empresa.id == setor.id_empresa))
-                    .map(|x| format!("id_setor = {}", x.id))
+                    .map(|x| format!("Gastos.id_setor = {}", x.id))
                     .collect::<Vec<String>>()
                     .join(" OR ")
             } else {
                 setor
                     .iter()
                     .filter(|s| empresa.iter().any(|empresa| empresa.id == s.id_empresa))
-                    .map(|x| format!("id_setor = {}", x.id))
+                    .map(|x| format!("Gastos.id_setor = {}", x.id))
                     .collect::<Vec<String>>()
                     .join(" OR ")
             },
