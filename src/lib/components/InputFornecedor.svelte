@@ -84,6 +84,23 @@
 		fornecedores = fornecedores.sort((a: { levDist: number }, b: { levDist: number }) => {
 			return a.levDist > b.levDist ? 1 : -1;
 		});
+		//aqui fornecedores está ordenado por levDist
+
+		
+		let A = [];
+		let B = [];
+		let C = [];
+		
+		for (let f of fornecedores) {
+			if(f.nome.includes(target.toLowerCase))
+				A.push(f);
+			else if(f.nome.toLowerCase().includes(target.toLowerCase()))
+				B.push(f);
+			else
+				C.push(f);
+		}
+		fornecedores = A.concat(B,C);
+
 		return fornecedores;
 	}
 
