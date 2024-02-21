@@ -25,6 +25,8 @@
 	export function reset() {
 		console.log('reset table');
 
+		habilitarSpreadsheetButton();
+
 		mainEl.scrollTop = 0;
 		offset = 0;
 		tbodyEl.replaceChildren();
@@ -44,12 +46,15 @@
 	let tbodyEl: HTMLTableSectionElement;
 	let tdBlueprint: HTMLElement;
 	let mainEl: HTMLElement;
+	let spreadsheedButton:HTMLButtonElement;
 	let offset = 0;
 	let sorterIndex = 0;
 	let sorterReverse = true;
 	let firstVisibleIndex = 0;
 
 	let maxRows: number = 0;
+
+	let timeoutHandlerExportButton:null|number = null;
 
 	function getRowAtId(id: number) {
 		return [id.toString(), id.toString(), id.toString(), id.toString(), id.toString()];
@@ -159,6 +164,26 @@
 		reset();
 	}
 
+	function spreadsheedButtonClick(){
+		spreadsheedButton.style.setProperty('--cor-icon','#777777');
+		spreadsheedButton.style.setProperty('pointer-events','none');
+		spreadsheedButton.style.setProperty('cursor','not-allowed');
+		
+		timeoutHandlerExportButton = setTimeout(habilitarSpreadsheetButton, 5000);
+
+		exportar(sorterIndex, sorterReverse);
+	}
+
+	function habilitarSpreadsheetButton(){
+		if(timeoutHandlerExportButton != null){
+			clearTimeout(timeoutHandlerExportButton);
+			timeoutHandlerExportButton = null;
+		}
+		spreadsheedButton.style.setProperty('--cor-icon','#2d9b2d');
+		spreadsheedButton.style.setProperty('pointer-events','all');
+		spreadsheedButton.style.setProperty('cursor','pointer');
+	}
+
 	onMount(() => {
 		tdBlueprint.style.display = 'none';
 		reset();
@@ -192,7 +217,7 @@
 				<td
 					colspan={titulos.length - 2 - Math.floor((titulos.length - 2) / 2)}
 					style="text-align: right;"><div id="left-footer">
-						<button on:click={()=>exportar(sorterIndex, sorterReverse)}>
+						<button on:click={spreadsheedButtonClick} id="spreadsheet-button" bind:this={spreadsheedButton}>
 							<div id="spreadsheet-container">
 								<div id="spreadsheet-icon">
 									<table>
@@ -225,13 +250,15 @@
 		display: flex;
 		justify-content: space-between;
 	}
-	#left-footer button{
+	#spreadsheet-button{
 		padding: 0;
 		border: none;
 		display: flex;
 		align-items: center;
 		background-color: transparent;
+		--cor-icon: #2d9b2d;
 	}
+	
 	#spreadsheet-container{
 		height: 20px;
 		width: 20px;
@@ -239,7 +266,7 @@
 		position: relative;
 	}
 	#spreadsheet-icon{
-		background-color: #2d9b2d;
+		background-color: var(--cor-icon);
 		height: 24px;
 		width: 20px;
 		position: absolute;
@@ -285,7 +312,7 @@
 		transition: width 0.5s, color 0.5s;
 		justify-content: end;
 		overflow: hidden;
-		color: #2d9b2d;
+		color: var(--cor-icon);
 	}
 	#left-footer button:hover span{
 		width: 55px;
@@ -343,7 +370,7 @@
 	table {
 		table-layout: fixed;
 		width: 100%;
-		height: 100%;
+		max-height: 100%;
 		text-align: left;
 		position: relative;
 		border-collapse: separate;
