@@ -99,8 +99,6 @@
 			else
 				C.push(f);
 		}
-		console.log(A);
-		
 		fornecedores = A.concat(B,C);
 
 		return fornecedores;
@@ -229,7 +227,7 @@
 	}
 	main:focus-within li{
 		border-width: 0 1px 1px 1px;
-		max-height: 30px;
+		max-height: 100px;
 	}
 
 	main:has(label button:not(:focus)) li:nth-child(n+6) {
