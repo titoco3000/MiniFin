@@ -116,8 +116,6 @@
 				tbodyEl.appendChild(rowToElement(row));
 			});
 			offset += a.length;
-
-			if (firstVisibleIndex == 0) firstVisibleIndex = 1;
 		});
 	}
 
@@ -136,13 +134,12 @@
 			//  firstVisibleIndex = Math.ceil(mainEl.scrollTop / tbodyEl.children[0].getBoundingClientRect().height);
 			//caso queira mostrar do primeiro ao ultimo
 
-			firstVisibleIndex = Math.max(
-				Math.min(1, tbodyEl.childElementCount),
-				sorterReverse
-					? maxRows - Math.round(valorScroll * offset)
-					: Math.round(valorScroll * offset)
-			);
-			if (isNaN(firstVisibleIndex)) firstVisibleIndex = 1;
+			
+			firstVisibleIndex = sorterReverse?
+				maxRows - Math.round(valorScroll * Math.max(0, tbodyEl.childElementCount-1)):
+				Math.round(valorScroll * Math.max(0, tbodyEl.childElementCount-1))+1
+			;
+			if (isNaN(firstVisibleIndex)) firstVisibleIndex = 0;
 		}
 	}
 
